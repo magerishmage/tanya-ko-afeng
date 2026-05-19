@@ -1,0 +1,2246 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kedai Afeng — Token Analyzer v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=DotGothic16&family=Press+Start+2P&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --pink:   #FF8FAB;
+  --blue:   #7EC8E3;
+  --mint:   #7DDFC3;
+  --peach:  #FFAD8C;
+  --lavender: #B8A9F0;
+  --yellow: #FFD97D;
+  --coral:  #FF9F9F;
+  --sky:    #A8D8EA;
+  --white:  #FFFFFF;
+  --offwhite: #FFF9F5;
+  --bg:     #FFFCF8;
+  --border: #F0E6FF;
+  --text:   #4A3F6B;
+  --text2:  #7A6E9A;
+  --text3:  #A89EC8;
+  --up:     #5CC8A0;
+  --down:   #FF7E7E;
+  --card-shadow: 0 4px 20px rgba(160,140,220,.12);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255,143,171,.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 10%, rgba(184,169,240,.10) 0%, transparent 35%),
+    radial-gradient(circle at 70% 80%, rgba(126,200,227,.08) 0%, transparent 40%),
+    radial-gradient(circle at 10% 85%, rgba(125,223,195,.07) 0%, transparent 35%);
+  pointer-events: none;
+}
+.sakura-wrap { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.sakura {
+  position: absolute; top: -20px;
+  width: 12px; height: 12px;
+  background: var(--pink);
+  border-radius: 50% 0 50% 0;
+  opacity: .25;
+  animation: fall linear infinite;
+}
+.sakura:nth-child(1)  { left:5%;  animation-duration:10s; animation-delay:0s; }
+.sakura:nth-child(2)  { left:10%; width:8px; height:8px; animation-duration:8s; animation-delay:-2s; background:var(--lavender); }
+.sakura:nth-child(3)  { left:20%; width:14px; height:14px; animation-duration:11s; animation-delay:-5s; }
+.sakura:nth-child(4)  { left:35%; width:9px; height:9px; animation-duration:7s; animation-delay:-1s; background:var(--peach); opacity:.2; }
+.sakura:nth-child(5)  { left:50%; width:11px; height:11px; animation-duration:9s; animation-delay:-3s; }
+.sakura:nth-child(6)  { left:65%; width:7px; height:7px; animation-duration:12s; animation-delay:-6s; background:var(--sky); }
+.sakura:nth-child(7)  { left:78%; width:13px; height:13px; animation-duration:8.5s; animation-delay:-4s; background:var(--lavender); }
+.sakura:nth-child(8)  { left:90%; width:10px; height:10px; animation-duration:10s; animation-delay:-7s; }
+@keyframes fall {
+  0%   { transform: translateY(-20px) rotate(0deg); opacity: .25; }
+  80%  { opacity: .2; }
+  100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+}
+
+.wrap { position: relative; z-index: 1; max-width: 820px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+/* HEADER */
+.header { text-align: center; margin-bottom: 2.5rem; animation: fadeDown .6s ease both; }
+.jp-top { font-family: 'Zen Maru Gothic', serif; font-size: 13px; color: var(--lavender); letter-spacing: .3em; margin-bottom: 6px; font-weight: 500; }
+.brand-row { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 6px; }
+.brand-icon { width: 54px; height: 54px; border-radius: 16px; background: linear-gradient(135deg, var(--pink) 0%, var(--lavender) 100%); display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 4px 16px rgba(255,143,171,.35); animation: bounce 2s ease-in-out infinite; }
+@keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+.brand-title { font-family: 'Zen Maru Gothic', serif; font-size: 34px; font-weight: 900; color: var(--text); text-shadow: 3px 3px 0 rgba(184,169,240,.3); letter-spacing: .02em; }
+.jp-sub { font-family: 'Zen Maru Gothic', serif; font-size: 15px; color: var(--text2); letter-spacing: .2em; margin-bottom: 10px; }
+.badge-row { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.badge { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 99px; letter-spacing: .04em; }
+.b-dyor { background: #FFF0C0; color: #B07A00; border: 1.5px solid #FFD97D; }
+.b-nfa  { background: #FFE8EE; color: #C0426A; border: 1.5px solid #FF8FAB; }
+.b-jp   { background: #F0ECFF; color: #6A57C0; border: 1.5px solid #B8A9F0; font-family: 'Zen Maru Gothic', serif; }
+
+.divider { display: flex; align-items: center; gap: 12px; margin: 0 0 2rem; }
+.divider-line { flex: 1; height: 2px; background: repeating-linear-gradient(90deg, var(--pink) 0, var(--pink) 6px, transparent 6px, transparent 10px); opacity: .4; }
+.divider-icon { font-size: 18px; animation: spin 6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* SEARCH */
+.search-wrap { background: var(--white); border: 2px solid var(--border); border-radius: 20px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; box-shadow: var(--card-shadow); animation: fadeUp .5s ease both; }
+.search-label { font-size: 12px; color: var(--text2); margin-bottom: 8px; font-weight: 700; letter-spacing: .06em; }
+.search-row { display: flex; gap: 10px; }
+.ca-input { flex: 1; font-family: 'DotGothic16', monospace; font-size: 13px; padding: 11px 16px; border: 2px solid #EDE6FF; border-radius: 12px; background: var(--offwhite); color: var(--text); outline: none; transition: border-color .2s, box-shadow .2s; }
+.ca-input::placeholder { color: var(--text3); }
+.ca-input:focus { border-color: var(--lavender); box-shadow: 0 0 0 3px rgba(184,169,240,.2); }
+.btn-analyze { padding: 11px 22px; font-size: 13px; font-weight: 800; font-family: 'M PLUS Rounded 1c', sans-serif; background: linear-gradient(135deg, var(--pink) 0%, var(--lavender) 100%); color: white; border: none; border-radius: 12px; cursor: pointer; white-space: nowrap; letter-spacing: .04em; box-shadow: 0 4px 14px rgba(255,143,171,.4); transition: transform .15s, box-shadow .15s; position: relative; overflow: hidden; }
+.btn-analyze::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,.2), transparent); }
+.btn-analyze:hover  { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,143,171,.5); }
+.btn-analyze:active { transform: translateY(0); }
+.btn-analyze:disabled { opacity: .55; transform: none; cursor: not-allowed; }
+
+.chain-hints { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.chain-tag { font-size: 11px; padding: 3px 10px; border-radius: 99px; font-weight: 700; letter-spacing: .04em; }
+.ct-sol  { background: #E6FFF5; color: #0A7A55; border: 1px solid #7DDFC3; }
+.ct-eth  { background: #EEF6FF; color: #1A5FA8; border: 1px solid #7EC8E3; }
+.ct-bsc  { background: #FFFBE6; color: #9A6B00; border: 1px solid #FFD97D; }
+.ct-base { background: #F2EEFF; color: #5A42B8; border: 1px solid #B8A9F0; }
+
+/* IDLE */
+.idle-state { background: var(--white); border: 2px dashed #EDE6FF; border-radius: 20px; padding: 3rem 2rem; text-align: center; animation: fadeUp .6s .1s ease both; }
+.idle-char { font-size: 64px; margin-bottom: 1rem; animation: wobble 3s ease-in-out infinite; }
+@keyframes wobble { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+.idle-title { font-family: 'Zen Maru Gothic', serif; font-size: 18px; color: var(--text); margin-bottom: 6px; font-weight: 700; }
+.idle-sub { font-size: 13px; color: var(--text2); line-height: 1.7; }
+.idle-jp  { font-family: 'Zen Maru Gothic', serif; font-size: 20px; color: var(--lavender); margin-top: .75rem; letter-spacing: .15em; }
+
+/* LOADER */
+.loader-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 3rem; text-align: center; }
+.pixel-loader { display: flex; gap: 6px; }
+.pixel-dot { width: 12px; height: 12px; border-radius: 3px; animation: dotPop .6s ease-in-out infinite; }
+.pixel-dot:nth-child(1) { background: var(--pink);     animation-delay: 0s; }
+.pixel-dot:nth-child(2) { background: var(--lavender); animation-delay: .1s; }
+.pixel-dot:nth-child(3) { background: var(--blue);     animation-delay: .2s; }
+.pixel-dot:nth-child(4) { background: var(--mint);     animation-delay: .3s; }
+@keyframes dotPop { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-8px) scale(1.15); } }
+.loader-text { font-family: 'DotGothic16', monospace; font-size: 13px; color: var(--text2); }
+.loader-jp { font-family: 'Zen Maru Gothic', serif; font-size: 12px; color: var(--text3); letter-spacing: .2em; }
+
+/* ERROR */
+.err-box { background: #FFF0F0; border: 2px solid var(--coral); border-radius: 14px; padding: 1rem 1.25rem; font-size: 13px; color: #B83030; margin-bottom: 1rem; }
+
+/* RESULT HEADER */
+.result-header { background: var(--white); border: 2px solid var(--border); border-radius: 20px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; box-shadow: var(--card-shadow); display: flex; align-items: center; flex-wrap: wrap; gap: 12px; animation: fadeUp .4s ease both; }
+.token-sym { font-family: 'Zen Maru Gothic', serif; font-size: 26px; font-weight: 900; color: var(--text); }
+.token-price-big { font-family: 'DotGothic16', monospace; font-size: 22px; color: var(--text); }
+.chain-badge { font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 99px; letter-spacing: .06em; }
+.cb-sol  { background: #E6FFF5; color: #0A7A55; border: 1.5px solid #7DDFC3; }
+.cb-eth  { background: #EEF6FF; color: #1A5FA8; border: 1.5px solid #7EC8E3; }
+.cb-bsc  { background: #FFFBE6; color: #9A6B00; border: 1.5px solid #FFD97D; }
+.cb-base { background: #F2EEFF; color: #5A42B8; border: 1.5px solid #B8A9F0; }
+.signal-badge { font-size: 12px; font-weight: 800; padding: 6px 16px; border-radius: 99px; letter-spacing: .06em; display: flex; align-items: center; gap: 5px; margin-left: auto; }
+.sb-strongbuy { background: #D4F7E9; color: #1A7A52; border: 2px solid #5CC8A0; }
+.sb-buy       { background: #E6FFF5; color: #1D9E75; border: 2px solid #7DDFC3; }
+.sb-neutral   { background: #F5F0FF; color: #7A6EB8; border: 2px solid #C0B4F0; }
+.sb-sell      { background: #FFF0E0; color: #C06020; border: 2px solid #FFAD8C; }
+.sb-strongsell{ background: #FFE8E8; color: #B83030; border: 2px solid #FF9F9F; }
+
+/* METRICS GRID */
+.metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 1rem; }
+.metric-card { background: var(--white); border: 2px solid var(--border); border-radius: 16px; padding: 1rem 1.1rem; box-shadow: var(--card-shadow); position: relative; overflow: hidden; animation: fadeUp .4s ease both; transition: transform .2s; }
+.metric-card:hover { transform: translateY(-3px); }
+.metric-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 16px 16px 0 0; }
+.mc-pink::before   { background: var(--pink); }
+.mc-blue::before   { background: var(--blue); }
+.mc-mint::before   { background: var(--mint); }
+.mc-lavender::before { background: var(--lavender); }
+.metric-jp   { font-family: 'Zen Maru Gothic', serif; font-size: 10px; color: var(--text3); margin-bottom: 2px; letter-spacing: .1em; }
+.metric-label{ font-size: 11px; color: var(--text2); font-weight: 700; margin-bottom: 4px; letter-spacing: .04em; }
+.metric-value{ font-family: 'DotGothic16', monospace; font-size: 20px; color: var(--text); }
+.metric-sub  { font-size: 11px; margin-top: 3px; color: var(--text2); }
+.up   { color: var(--up) !important; }
+.down { color: var(--down) !important; }
+
+/* TWO COL */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+@media(max-width: 560px){ .two-col { grid-template-columns: 1fr; } }
+
+/* PANEL */
+.panel { background: var(--white); border: 2px solid var(--border); border-radius: 18px; padding: 1.1rem 1.25rem; box-shadow: var(--card-shadow); animation: fadeUp .5s ease both; }
+.panel-title { font-family: 'Zen Maru Gothic', serif; font-size: 13px; font-weight: 700; color: var(--lavender); letter-spacing: .1em; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.panel-title-icon { font-size: 16px; }
+
+/* ENTRY */
+.entry-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1.5px dashed #F0E6FF; font-size: 13px; }
+.entry-row:last-child { border-bottom: none; }
+.entry-lbl { color: var(--text2); font-size: 12px; }
+.entry-val { font-family: 'DotGothic16', monospace; font-weight: 400; font-size: 13px; color: var(--text); }
+.entry-entry { color: var(--mint) !important; font-weight: 700; }
+.entry-sl    { color: var(--down) !important; }
+.entry-tp    { color: var(--up) !important; }
+.rrr-good    { color: var(--lavender) !important; font-weight: 700; }
+
+/* FIB */
+.fib-track { height: 10px; border-radius: 99px; background: #F5EEFF; position: relative; margin: 14px 0 6px; overflow: visible; }
+.fib-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--mint), var(--lavender)); transition: width .8s cubic-bezier(.34,1.56,.64,1); }
+.fib-pin { position: absolute; top: -5px; width: 4px; height: 20px; background: var(--pink); border-radius: 2px; box-shadow: 0 0 6px rgba(255,143,171,.6); }
+.fib-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--text3); font-family: 'DotGothic16', monospace; }
+
+/* WHALE */
+.whale-item { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-bottom: 1.5px dashed #F0E6FF; }
+.whale-item:last-of-type { border-bottom: none; }
+.w-avatar { width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; font-family: 'DotGothic16', monospace; }
+.wa-kol   { background: #EEF6FF; color: #185FA5; border: 2px solid #7EC8E3; }
+.wa-whale { background: #FFFBE6; color: #9A6B00; border: 2px solid #FFD97D; }
+.wa-smart { background: #E6FFF5; color: #0A7A55; border: 2px solid #7DDFC3; }
+.w-name   { font-size: 12px; font-weight: 700; color: var(--text); }
+.w-meta   { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.w-pnl    { margin-left: auto; text-align: right; }
+.w-pct    { font-family: 'DotGothic16', monospace; font-size: 14px; font-weight: 700; }
+.w-status { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.ext-links { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.ext-link { font-size: 11px; padding: 4px 12px; border-radius: 99px; font-weight: 700; text-decoration: none; border: 1.5px solid var(--border); color: var(--lavender); background: #F8F5FF; transition: background .15s; }
+.ext-link:hover { background: #EDE6FF; }
+
+/* VOLUME */
+.vol-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1.5px dashed #F0E6FF; font-size: 12px; }
+.vol-row:last-child { border-bottom: none; }
+.vol-tf  { color: var(--text2); font-family: 'DotGothic16', monospace; width: 28px; flex-shrink: 0; }
+.vol-bg  { flex: 1; height: 8px; border-radius: 99px; background: #F5EEFF; overflow: hidden; }
+.vol-fill{ height: 100%; border-radius: 99px; transition: width .7s ease; }
+.vol-val { font-family: 'DotGothic16', monospace; font-size: 12px; min-width: 62px; text-align: right; color: var(--text); }
+
+/* SCORE */
+.score-center { display: flex; flex-direction: column; align-items: center; padding: .75rem 0 1rem; }
+.score-circle { width: 80px; height: 80px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'DotGothic16', monospace; margin-bottom: 8px; animation: popIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+.score-num   { font-size: 28px; line-height: 1; }
+.score-denom { font-size: 11px; color: var(--text2); }
+.score-lbl   { font-size: 12px; font-weight: 700; letter-spacing: .05em; }
+.risk-row    { margin-bottom: 8px; }
+.risk-lbl    { display: flex; justify-content: space-between; font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+.risk-bg     { height: 7px; border-radius: 99px; background: #F5EEFF; overflow: hidden; }
+.risk-fill   { height: 100%; border-radius: 99px; transition: width .7s ease; }
+.tf-recommend { background: #F8F5FF; border: 1.5px solid #EDE6FF; border-radius: 10px; padding: 8px 12px; font-size: 12px; color: var(--text); margin-top: 12px; line-height: 1.6; }
+.tf-recommend .tf-lbl { font-size: 10px; color: var(--text2); font-weight: 700; letter-spacing: .08em; margin-bottom: 4px; }
+
+/* SIG TABLE */
+.sig-table { width: 100%; font-size: 12px; border-collapse: collapse; }
+.sig-table td { padding: 6px 0; border-bottom: 1.5px dashed #F0E6FF; }
+.sig-table tr:last-child td { border-bottom: none; }
+.sig-name { color: var(--text2); }
+.sig-val  { font-family: 'DotGothic16', monospace; text-align: right; color: var(--text); }
+.sig-pill { display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 99px; }
+.sp-buy     { background: #E6FFF5; color: #1D9E75; border: 1px solid #7DDFC3; }
+.sp-sell    { background: #FFE8E8; color: #B83030; border: 1px solid #FF9F9F; }
+.sp-neutral { background: #F5F0FF; color: #7A6EB8; border: 1px solid #C0B4F0; }
+
+/* HOLDER ANALYSIS */
+.holder-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+@media(max-width:480px){ .holder-grid { grid-template-columns: 1fr; } }
+.holder-card { background: var(--offwhite); border: 1.5px solid var(--border); border-radius: 12px; padding: .85rem 1rem; }
+.holder-card-title { font-size: 10px; font-weight: 800; color: var(--text2); letter-spacing: .08em; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+.holder-score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.holder-score-num { font-family: 'DotGothic16', monospace; font-size: 26px; line-height: 1; }
+.holder-score-bar-wrap { flex: 1; }
+.holder-score-label { font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+.holder-bar { height: 7px; border-radius: 99px; background: #F0E8FF; overflow: hidden; }
+.holder-bar-fill { height: 100%; border-radius: 99px; transition: width .7s ease; }
+.holder-sub-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--text2); margin-top: 4px; }
+.holder-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; margin: 2px 2px 0 0; }
+.ht-fresh { background: #FFF0E0; color: #C06020; border: 1px solid #FFAD8C; }
+.ht-safe  { background: #E6FFF5; color: #1D9E75; border: 1px solid #7DDFC3; }
+.holder-detail-row { font-size: 11px; color: var(--text2); display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #F0E6FF; }
+.holder-detail-row:last-child { border-bottom: none; }
+.holder-detail-val { font-family: 'DotGothic16', monospace; font-size: 11px; color: var(--text); }
+
+/* MORE BTN */
+.more-btn {
+  display: block; width: 100%; margin: 1rem 0;
+  padding: 14px; font-size: 14px; font-weight: 800;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  background: linear-gradient(135deg, var(--pink) 0%, var(--lavender) 50%, var(--blue) 100%);
+  border: none;
+  border-radius: 16px; cursor: pointer;
+  color: white; letter-spacing: .04em;
+  transition: all .2s;
+  box-shadow: 0 4px 24px rgba(255,143,171,.4), 0 1px 0 rgba(255,255,255,.3) inset;
+  text-shadow: 0 1px 4px rgba(100,60,180,.3);
+  animation: rpgPulse 2.5s ease-in-out infinite;
+  position: relative; overflow: hidden;
+}
+.more-btn::before {
+  content: '✿ ❀ ✦';
+  position: absolute; right: 20px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px; opacity: .55; letter-spacing: .4em;
+  pointer-events: none;
+}
+@keyframes rpgPulse {
+  0%,100% { box-shadow: 0 4px 24px rgba(255,143,171,.4), 0 1px 0 rgba(255,255,255,.3) inset; }
+  50%      { box-shadow: 0 6px 34px rgba(184,169,240,.55), 0 0 20px rgba(255,143,171,.2), 0 1px 0 rgba(255,255,255,.3) inset; }
+}
+.more-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(255,143,171,.5); }
+
+/* FOOTER */
+.footer { text-align: center; padding-top: 1.5rem; border-top: 2px dashed #EDE6FF; animation: fadeUp .5s ease both; }
+.footer-jp { font-family: 'Zen Maru Gothic', serif; font-size: 20px; color: var(--lavender); letter-spacing: .25em; margin-bottom: 6px; }
+.footer-badges { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.footer-disc { font-size: 11px; color: var(--text3); line-height: 1.7; max-width: 520px; margin: 0 auto; }
+
+/* ANIMATIONS */
+@keyframes fadeDown { from { opacity: 0; transform: translateY(-18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeUp   { from { opacity: 0; transform: translateY(14px); }  to { opacity: 1; transform: translateY(0); } }
+
+/* BUBBLE CLUSTER */
+.bubble-cluster-wrap {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: 18px;
+  padding: 1.1rem 1.25rem;
+  box-shadow: var(--card-shadow);
+  margin-bottom: 1rem;
+  animation: fadeUp .5s ease both;
+}
+.bubble-cluster-wrap .panel-title { margin-bottom: 8px; }
+.bubble-legend {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  font-size: 10px; color: var(--text2); margin-bottom: 10px;
+}
+.bubble-legend span { display: flex; align-items: center; gap: 4px; }
+.bubble-legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+.bleg-dev::before   { background: #FF8FAB; }
+.bleg-whale::before { background: #FFD97D; }
+.bleg-sm::before    { background: #7DDFC3; }
+.bleg-kol::before   { background: #7EC8E3; }
+.bleg-retail::before{ background: #B8A9F0; }
+
+#bubbleCanvas {
+  width: 100%; height: 260px;
+  display: block;
+  cursor: crosshair;
+}
+
+.bubble-tooltip {
+  position: fixed;
+  background: var(--white);
+  color: var(--text);
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-size: 11px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  pointer-events: none;
+  z-index: 9999;
+  display: none;
+  max-width: 180px;
+  line-height: 1.6;
+  box-shadow: 0 4px 20px rgba(160,140,220,.2);
+}
+
+/* ===== RPG DIALOG MODAL — PASTEL KAWAII EDITION ===== */
+
+/* Overlay: soft blurred pastel fog */
+.rpg-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(230, 210, 255, 0.55);
+  backdrop-filter: blur(10px);
+  display: flex; align-items: flex-end; justify-content: center;
+  padding: 0 1rem 1rem;
+  opacity: 0; pointer-events: none;
+  transition: opacity .35s ease;
+}
+.rpg-overlay.open { opacity: 1; pointer-events: all; }
+
+/* Floating sakura inside overlay */
+.rpg-overlay::before {
+  content: '✿ ✦ ❀ ✿ ❁ ✦ ✿';
+  position: absolute; top: 10px; left: 0; right: 0;
+  text-align: center; font-size: 18px;
+  color: rgba(255,143,171,.35);
+  letter-spacing: 2rem;
+  animation: floatRow 6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes floatRow {
+  0%,100% { transform: translateY(0); opacity: .35; }
+  50%      { transform: translateY(6px); opacity: .6; }
+}
+
+/* Dialog: white card with pastel border */
+.rpg-dialog {
+  width: 100%; max-width: 780px;
+  background: linear-gradient(160deg, #FFFCF8 0%, #FFF0F8 40%, #F5EEFF 100%);
+  border: 3px solid var(--pink);
+  border-radius: 24px 24px 0 0;
+  overflow: hidden;
+  box-shadow:
+    0 -6px 40px rgba(255,143,171,.25),
+    0 -2px 0 rgba(184,169,240,.3),
+    inset 0 1px 0 rgba(255,255,255,.9);
+  max-height: 88vh;
+  display: flex; flex-direction: column;
+  transform: translateY(40px);
+  transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+}
+.rpg-overlay.open .rpg-dialog { transform: translateY(0); }
+
+/* Header: gradient pastel ribbon */
+.rpg-header {
+  background: linear-gradient(90deg, #FFD6E5 0%, #E8D8FF 50%, #D6F0FF 100%);
+  border-bottom: 2.5px solid var(--border);
+  padding: 12px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: relative; overflow: hidden;
+}
+.rpg-header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255,255,255,.3) 0, rgba(255,255,255,.3) 4px,
+    transparent 4px, transparent 16px
+  );
+  pointer-events: none;
+}
+/* Pixel-art corner stars */
+.rpg-header::after {
+  content: '⋆｡°✩ ⋆｡°✩';
+  position: absolute; right: 60px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px; color: rgba(184,169,240,.7);
+  letter-spacing: .4em;
+  pointer-events: none;
+}
+.rpg-header-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px; color: var(--text);
+  letter-spacing: .04em;
+  text-shadow: 1px 1px 0 rgba(184,169,240,.5), 2px 2px 0 rgba(255,143,171,.2);
+}
+.rpg-close {
+  background: var(--white); border: 2px solid var(--border);
+  color: var(--text2); font-size: 14px; cursor: pointer;
+  border-radius: 10px; width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s; font-family: 'DotGothic16', monospace;
+  box-shadow: 0 2px 8px rgba(160,140,220,.15);
+  position: relative; z-index: 1;
+}
+.rpg-close:hover { background: #FFE8EE; border-color: var(--pink); color: var(--pink); transform: rotate(90deg); }
+
+/* Body: soft warm white scroll area */
+.rpg-body {
+  flex: 1; overflow-y: auto; padding: 20px;
+  background:
+    radial-gradient(circle at 10% 20%, rgba(255,143,171,.05) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(184,169,240,.06) 0%, transparent 40%);
+}
+.rpg-body::-webkit-scrollbar { width: 5px; }
+.rpg-body::-webkit-scrollbar-track { background: #F5EEFF; border-radius: 99px; }
+.rpg-body::-webkit-scrollbar-thumb { background: var(--lavender); border-radius: 99px; }
+
+/* ── Chat layout ── */
+.rpg-scene { display: flex; flex-direction: column; gap: 18px; }
+.rpg-msg {
+  display: flex; gap: 12px; align-items: flex-start;
+  animation: rpgFadeIn .45s ease both;
+}
+@keyframes rpgFadeIn {
+  from { opacity: 0; transform: translateY(12px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.rpg-msg.right { flex-direction: row-reverse; }
+
+/* Avatars: pastel pill with double-ring glow */
+.rpg-avatar {
+  width: 52px; height: 52px; border-radius: 16px;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 24px; border: 2.5px solid;
+  position: relative;
+  box-shadow: 0 4px 14px rgba(160,140,220,.2);
+  transition: transform .2s;
+}
+.rpg-avatar:hover { transform: scale(1.08) rotate(-3deg); }
+
+/* Avatar inner glow ring animation */
+.rpg-avatar::after {
+  content: '';
+  position: absolute; inset: -5px;
+  border-radius: 20px;
+  border: 2px solid;
+  opacity: 0;
+  animation: avatarPulse 3s ease-in-out infinite;
+}
+@keyframes avatarPulse {
+  0%,100% { opacity: 0; transform: scale(1); }
+  50%      { opacity: .35; transform: scale(1.05); }
+}
+
+.rpg-avatar.afeng   { background: #FFF0F5; border-color: var(--pink); }
+.rpg-avatar.afeng::after   { border-color: var(--pink); }
+.rpg-avatar.analyst { background: #F0F8FF; border-color: var(--blue); }
+.rpg-avatar.analyst::after { border-color: var(--blue); }
+.rpg-avatar.whale   { background: #FFFBF0; border-color: var(--yellow); }
+.rpg-avatar.whale::after   { border-color: var(--yellow); }
+.rpg-avatar.kol     { background: #F0FFF8; border-color: var(--mint); }
+.rpg-avatar.kol::after     { border-color: var(--mint); }
+.rpg-avatar.devil   { background: #FFF5F0; border-color: var(--peach); }
+.rpg-avatar.devil::after   { border-color: var(--peach); }
+.rpg-avatar.sage    { background: #F5F0FF; border-color: var(--lavender); }
+.rpg-avatar.sage::after    { border-color: var(--lavender); }
+
+/* Character name badge */
+.rpg-bubble-wrap { flex: 1; min-width: 0; }
+.rpg-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7.5px; margin-bottom: 6px;
+  letter-spacing: .04em;
+  display: inline-block;
+  padding: 3px 10px 3px 8px;
+  border-radius: 99px;
+  border: 1.5px solid;
+}
+.rpg-name.afeng-name   { color: #C0426A; background: #FFF0F5; border-color: #FFB8CE; }
+.rpg-name.analyst-name { color: #1A5FA8; background: #EEF6FF; border-color: #A8DAEF; }
+.rpg-name.whale-name   { color: #9A6B00; background: #FFFBE6; border-color: #FFE49A; }
+.rpg-name.kol-name     { color: #0A7A55; background: #EDFFF8; border-color: #9AEED8; }
+.rpg-name.devil-name   { color: #B05030; background: #FFF5F0; border-color: #FFCDB8; }
+.rpg-name.sage-name    { color: #6A57C0; background: #F5F0FF; border-color: #D0C4F8; }
+.rpg-msg.right .rpg-name { display: block; text-align: right; }
+
+/* Speech bubbles: soft card style */
+.rpg-bubble {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: 4px 16px 16px 16px;
+  padding: 13px 16px;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.85;
+  position: relative;
+  max-width: 580px;
+  box-shadow: 0 3px 16px rgba(160,140,220,.1), inset 0 1px 0 rgba(255,255,255,.8);
+}
+.rpg-msg.right .rpg-bubble {
+  border-radius: 16px 4px 16px 16px;
+  background: linear-gradient(135deg, #FAFEFF 0%, #F0F8FF 100%);
+  border-color: #D0E8F8;
+}
+
+/* Bubble tail */
+.rpg-bubble::before {
+  content: '';
+  position: absolute; top: 0; left: -9px;
+  border: 6px solid transparent;
+  border-right-color: var(--border);
+  border-top-color: var(--border);
+}
+.rpg-bubble::after {
+  content: '';
+  position: absolute; top: 1px; left: -6px;
+  border: 5px solid transparent;
+  border-right-color: var(--white);
+  border-top-color: var(--white);
+}
+.rpg-msg.right .rpg-bubble::before {
+  left: auto; right: -9px;
+  border-right-color: transparent;
+  border-left-color: #D0E8F8;
+  border-top-color: #D0E8F8;
+}
+.rpg-msg.right .rpg-bubble::after {
+  left: auto; right: -6px;
+  border-right-color: transparent;
+  border-left-color: #FAFEFF;
+  border-top-color: #FAFEFF;
+}
+
+/* Bubble text color helpers */
+.rpg-bubble .hi     { color: #B07A00; font-weight: 700; }
+.rpg-bubble .ok     { color: #1A8A6A; font-weight: 600; }
+.rpg-bubble .warn   { color: #C06020; font-weight: 600; }
+.rpg-bubble .danger { color: #B83030; font-weight: 600; }
+.rpg-bubble .val    { color: #6A57C0; font-weight: 700; }
+
+/* Stat rows inside bubble */
+.rpg-stat {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 5px 0; border-bottom: 1.5px dashed var(--border); font-size: 11.5px;
+}
+.rpg-stat:last-child { border-bottom: none; }
+.rpg-stat .lbl { color: var(--text2); }
+.rpg-stat .vl  { font-weight: 700; }
+
+/* Loading state */
+.rpg-loading {
+  display: flex; align-items: center; gap: 12px;
+  padding: 20px; color: var(--text2);
+  font-family: 'M PLUS Rounded 1c', sans-serif; font-size: 13px;
+}
+.rpg-dots { display: flex; gap: 5px; }
+.rpg-dots span {
+  width: 8px; height: 8px; border-radius: 50%;
+  animation: dotPop .8s ease-in-out infinite;
+}
+.rpg-dots span:nth-child(1) { background: var(--pink); }
+.rpg-dots span:nth-child(2) { background: var(--lavender); animation-delay: .2s; }
+.rpg-dots span:nth-child(3) { background: var(--blue); animation-delay: .4s; }
+
+/* Section dividers: kawaii scroll banner */
+.rpg-divider {
+  display: flex; align-items: center; gap: 10px;
+  margin: 6px 0;
+}
+.rpg-divider-line {
+  flex: 1; height: 2px;
+  background: repeating-linear-gradient(90deg,
+    var(--pink) 0, var(--pink) 5px,
+    var(--lavender) 5px, var(--lavender) 10px,
+    var(--blue) 10px, var(--blue) 15px,
+    transparent 15px, transparent 20px
+  );
+  opacity: .35; border-radius: 99px;
+}
+.rpg-divider-txt {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6.5px; color: var(--lavender);
+  letter-spacing: .08em;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  padding: 3px 10px; border-radius: 99px;
+  white-space: nowrap;
+}
+
+/* Action bar at bottom */
+.rpg-actions {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  padding: 12px 20px;
+  border-top: 2px solid var(--border);
+  background: linear-gradient(90deg, #FFF5F8, #F8F5FF, #F5FAFF);
+}
+.rpg-action-btn {
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-size: 12px; font-weight: 700;
+  padding: 8px 18px;
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: 10px; color: var(--text2); cursor: pointer;
+  transition: all .2s;
+  box-shadow: 0 2px 8px rgba(160,140,220,.1);
+}
+.rpg-action-btn:hover {
+  background: linear-gradient(135deg, var(--pink), var(--lavender));
+  color: white; border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(255,143,171,.35);
+}
+
+/* Floating sparkles in rpg-body */
+.rpg-sparkle {
+  position: absolute; pointer-events: none;
+  font-size: 14px; opacity: 0;
+  animation: sparkleFloat 4s ease-in-out infinite;
+}
+@keyframes sparkleFloat {
+  0%   { opacity: 0; transform: translateY(0) scale(.5); }
+  20%  { opacity: .6; transform: translateY(-12px) scale(1); }
+  80%  { opacity: .4; transform: translateY(-28px) scale(.8); }
+  100% { opacity: 0; transform: translateY(-40px) scale(.3); }
+}
+
+/* RESPONSIVE */
+@media(max-width: 480px) {
+  .brand-title { font-size: 26px; }
+  .search-row  { flex-direction: column; }
+  .btn-analyze { width: 100%; }
+  .token-price-big { font-size: 17px; }
+  .rpg-bubble { font-size: 11px; }
+  .rpg-name { font-size: 7px; }
+  .rpg-header-title { font-size: 8px; }
+}
+
+/* ── ALPHA CARDS (Fresh Wallet / Cult / Farm) ── */
+.alpha-grid { display: grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-bottom:1rem; }
+@media(max-width:600px){ .alpha-grid { grid-template-columns:1fr; } }
+.alpha-card { background:var(--white); border:2px solid var(--border); border-radius:16px; padding:1rem 1.1rem; box-shadow:var(--card-shadow); animation:fadeUp .5s ease both; position:relative; overflow:hidden; }
+.alpha-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:16px 16px 0 0; }
+.alpha-fresh::before  { background:linear-gradient(90deg,var(--peach),var(--yellow)); }
+.alpha-cult::before   { background:linear-gradient(90deg,var(--pink),var(--lavender)); }
+.alpha-farm::before   { background:linear-gradient(90deg,var(--mint),var(--blue)); }
+.alpha-title { font-size:10px; font-weight:800; letter-spacing:.08em; color:var(--text2); margin-bottom:8px; display:flex; align-items:center; gap:5px; }
+.alpha-score-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.alpha-score-big { font-family:'DotGothic16',monospace; font-size:28px; line-height:1; }
+.alpha-score-right { flex:1; }
+.alpha-badge { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; margin-bottom:4px; }
+.ab-ok      { background:#E6FFF5; color:#1D9E75; border:1px solid #7DDFC3; }
+.ab-warn    { background:#FFF8E0; color:#B07A00; border:1px solid #FFD97D; }
+.ab-danger  { background:#FFE8E8; color:#B83030; border:1px solid #FF9F9F; }
+.ab-neutral { background:#F5F0FF; color:#7A6EB8; border:1px solid #C0B4F0; }
+.alpha-bar  { height:6px; border-radius:99px; background:#F0E8FF; overflow:hidden; margin-top:4px; }
+.alpha-bar-fill { height:100%; border-radius:99px; transition:width .7s ease; }
+.alpha-stat { display:flex; justify-content:space-between; font-size:11px; padding:3px 0; border-bottom:1px dashed #F0E6FF; color:var(--text2); }
+.alpha-stat:last-child { border-bottom:none; }
+.alpha-stat-val { font-family:'DotGothic16',monospace; font-size:11px; color:var(--text); }
+.alpha-note { font-size:10px; color:var(--text3); line-height:1.6; margin-top:8px; }
+.alpha-source { font-size:9px; color:var(--text3); margin-top:6px; display:flex; align-items:center; gap:4px; }
+.fib-source-badge { display:inline-flex; align-items:center; gap:4px; font-size:9px; font-weight:700; padding:1px 7px; border-radius:99px; background:#F0F8FF; color:#1A5FA8; border:1px solid #7EC8E3; margin-left:6px; }
+</style>
+</head>
+<body>
+
+<div class="sakura-wrap" aria-hidden="true">
+  <div class="sakura"></div><div class="sakura"></div><div class="sakura"></div>
+  <div class="sakura"></div><div class="sakura"></div><div class="sakura"></div>
+  <div class="sakura"></div><div class="sakura"></div>
+</div>
+
+<!-- RPG DIALOG OVERLAY -->
+<div class="rpg-overlay" id="rpgOverlay">
+  <div class="rpg-dialog" id="rpgDialog">
+    <div class="rpg-header">
+      <div class="rpg-header-title">⚔ AFENG ORACLE — DEEP ANALYSIS ⚔</div>
+      <button class="rpg-close" onclick="closeRpg()">✕</button>
+    </div>
+    <div class="rpg-body" id="rpgBody">
+      <div class="rpg-loading">
+        <div class="rpg-dots"><span></span><span></span><span></span></div>
+        Afeng lagi mikir keras...
+      </div>
+    </div>
+    <div class="rpg-actions" id="rpgActions" style="display:none">
+      <button class="rpg-action-btn" onclick="closeRpg()">[ ESC ] Tutup</button>
+      <button class="rpg-action-btn" id="rpgBubbleMapBtn">[ B ] Lihat Bubble Map ↗</button>
+    </div>
+  </div>
+</div>
+
+<!-- BUBBLE TOOLTIP -->
+<div class="bubble-tooltip" id="bubbleTooltip"></div>
+
+<div class="wrap">
+  <header class="header">
+    <div class="jp-top">けだい・あふぇん ✦ トークン分析 v2</div>
+    <div class="brand-row">
+      <div class="brand-icon">🍵</div>
+      <h1 class="brand-title">Kedai Afeng</h1>
+    </div>
+    <div class="jp-sub">デジタル茶屋 — Token Analyzer</div>
+    <div class="badge-row">
+      <span class="badge b-dyor">⚠ DYOR</span>
+      <span class="badge b-nfa">♡ NFA</span>
+      <span class="badge b-jp">自己責任で</span>
+    </div>
+  </header>
+
+  <div class="divider"><div class="divider-line"></div><span class="divider-icon">✿</span><div class="divider-line"></div></div>
+
+  <section class="search-wrap">
+    <div class="search-label">✦ CONTRACT ADDRESS (CA)</div>
+    <div class="search-row">
+      <input class="ca-input" id="caInput"
+        placeholder="Paste CA token disini... (Solana / ETH / BSC / Base)"
+        autocomplete="off" spellcheck="false"/>
+      <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">🔮 Analisis</button>
+    </div>
+    <div class="chain-hints">
+      <span class="chain-tag ct-sol">◎ Solana</span>
+      <span class="chain-tag ct-eth">◈ Ethereum</span>
+      <span class="chain-tag ct-bsc">◆ BSC</span>
+      <span class="chain-tag ct-base">◇ Base</span>
+    </div>
+  </section>
+
+  <main id="content" aria-live="polite">
+    <div class="idle-state">
+      <div class="idle-char">🧙‍♀️</div>
+      <div class="idle-title">Selamat datang di Kedai Afeng!</div>
+      <div class="idle-sub">
+        Paste contract address token favoritmu dan biar si Afeng yang analisa.<br/>
+        Entry, Fibonacci, Whale tracker, Bubble Cluster — semua dalam satu tempat yang cozy~ ✨
+      </div>
+      <div class="idle-jp">さあ、始めましょう！</div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-jp">自己責任で ✿ がんばって</div>
+    <div class="footer-badges">
+      <span class="badge b-dyor">⚠ Do Your Own Research</span>
+      <span class="badge b-nfa">♡ Not Financial Advice</span>
+    </div>
+    <div class="footer-disc">
+      Kedai Afeng adalah tools analisis teknikal berbasis data publik (DexScreener API).
+      Bubble cluster adalah estimasi distribusi berbasis data volume behavior — bukan data on-chain real.
+      Selalu DYOR sebelum masuk posisi. 頑張れ！
+    </div>
+  </footer>
+</div>
+
+<script>
+const DEXSCREENER = 'https://api.dexscreener.com/latest/dex/tokens/';
+
+// ─── State ───────────────────────────────────────────
+let _currentData = null;
+let _currentSym  = '';
+let _currentCA   = '';
+let _currentChain = '';
+let _bubbles = [];
+let _lastFib  = null;
+let _lastCult = null;
+let _lastFarm = null;
+let _lastHeat = null;
+
+// ─── Formatters ──────────────────────────────────────
+function fmt(n) {
+  if (!n || isNaN(n)) return '—';
+  if (n>=1e9) return '$'+(n/1e9).toFixed(2)+'B';
+  if (n>=1e6) return '$'+(n/1e6).toFixed(2)+'M';
+  if (n>=1e3) return '$'+(n/1e3).toFixed(1)+'K';
+  return '$'+n.toFixed(2);
+}
+function fmtP(n) {
+  if (n===undefined||n===null||isNaN(n)) return '—';
+  return (n>=0?'+':'')+n.toFixed(2)+'%';
+}
+function fmtPrice(n) {
+  if (!n||isNaN(n)) return '—';
+  if (n<0.000001) return '$'+n.toExponential(4);
+  if (n<0.01) return '$'+n.toFixed(7);
+  if (n<1) return '$'+n.toFixed(5);
+  return '$'+n.toFixed(4);
+}
+
+// ─── Maths ───────────────────────────────────────────
+// ohlcv: {high, low} real dari GeckoTerminal, null jika gagal
+function calcFib(price, ch24, ohlcv) {
+  let high, low;
+  if (ohlcv && ohlcv.high > 0 && ohlcv.low > 0 && ohlcv.high > ohlcv.low) {
+    // ✅ Primary: real OHLCV dari GeckoTerminal
+    high = ohlcv.high;
+    low  = ohlcv.low;
+  } else {
+    // ⚠️ Fallback: estimasi dari DexScreener priceChange 24H
+    const swing = Math.max(Math.abs(ch24)/100, 0.03);
+    high = price * (1 + swing);
+    low  = price / (1 + swing);
+  }
+  // Pastikan price ada di dalam range high-low
+  high = Math.max(high, price * 1.001);
+  low  = Math.min(low,  price * 0.999);
+  const r = high - low;
+  return {
+    r0: low,
+    r236: low + r*.236, r382: low + r*.382,
+    r500: low + r*.5,   r618: low + r*.618,
+    r786: low + r*.786, r100: high,
+    pos: Math.max(0, Math.min(100, ((price-low)/r)*100)),
+    source: (ohlcv && ohlcv.high > 0) ? 'GeckoTerminal OHLCV' : 'Est. DexScreener'
+  };
+}
+
+function computeSignal(data) {
+  let s = 50;
+  const ch24=parseFloat(data.priceChange?.h24||0);
+  const ch6 =parseFloat(data.priceChange?.h6||0);
+  const ch1 =parseFloat(data.priceChange?.h1||0);
+  const vol24=parseFloat(data.volume?.h24||0);
+  const vol6 =parseFloat(data.volume?.h6||0);
+  const liq  =parseFloat(data.liquidity?.usd||0);
+  const mc   =parseFloat(data.marketCap||data.fdv||0);
+  const buy  =parseInt(data.txns?.h24?.buys||0);
+  const sell =parseInt(data.txns?.h24?.sells||0);
+  const reasons=[];
+  const addR=(k,v,sig,delta)=>{ s+=delta; reasons.push({k,v,s:sig}); };
+
+  if(ch1>5)      addR('Price 1H',fmtP(ch1),'buy',8);
+  else if(ch1<-5)addR('Price 1H',fmtP(ch1),'sell',-8);
+  else            addR('Price 1H',fmtP(ch1),'neutral',0);
+
+  if(ch6>10)      addR('Momentum 6H',fmtP(ch6),'buy',10);
+  else if(ch6<-10)addR('Momentum 6H',fmtP(ch6),'sell',-10);
+  else             addR('Momentum 6H',fmtP(ch6),'neutral',0);
+
+  if(ch24>20)      addR('Trend 24H',fmtP(ch24),'buy',8);
+  else if(ch24<-15)addR('Trend 24H',fmtP(ch24),'sell',-8);
+  else              addR('Trend 24H',fmtP(ch24),'neutral',0);
+
+  const vmr=mc>0?(vol24/mc):0;
+  if(vmr>.5)     addR('Vol/MC Ratio',(vmr*100).toFixed(0)+'%','buy',12);
+  else if(vmr>.1)addR('Vol/MC Ratio',(vmr*100).toFixed(0)+'%','buy',5);
+  else            addR('Vol/MC Ratio',(vmr*100).toFixed(0)+'%','neutral',0);
+
+  const va=vol6>0&&vol24>0?vol6/(vol24/4):1;
+  if(va>1.5)    addR('Vol Accel',va.toFixed(2)+'x','buy',10);
+  else if(va<.5)addR('Vol Accel',va.toFixed(2)+'x','sell',-6);
+  else           addR('Vol Accel',va.toFixed(2)+'x','neutral',0);
+
+  const br=(buy+sell)>0?buy/(buy+sell):.5;
+  if(br>.6)     addR('Buy Ratio',(br*100).toFixed(0)+'%','buy',8);
+  else if(br<.4)addR('Buy Ratio',(br*100).toFixed(0)+'%','sell',-8);
+  else           addR('Buy Ratio',(br*100).toFixed(0)+'%','neutral',0);
+
+  if(liq>500000)     addR('Liquidity',fmt(liq),'buy',5);
+  else if(liq<10000) addR('Liquidity',fmt(liq),'sell',-10);
+  else                addR('Liquidity',fmt(liq),'neutral',0);
+
+  s=Math.max(0,Math.min(100,s));
+  let label,cls;
+  if(s>=75){label='Strong Buy';cls='sb-strongbuy';}
+  else if(s>=60){label='Buy';cls='sb-buy';}
+  else if(s>=40){label='Neutral';cls='sb-neutral';}
+  else if(s>=25){label='Sell';cls='sb-sell';}
+  else{label='Strong Sell';cls='sb-strongsell';}
+  return{score:s,label,cls,reasons};
+}
+
+function computeEntry(price,fib,ch1) {
+  let method,entry,sl,tp1,tp2,tp3;
+  if(price<fib.r382){
+    method='Support Bounce 23.6–38.2%';entry=fib.r236;sl=fib.r0*.95;tp1=fib.r382;tp2=fib.r500;tp3=fib.r618;
+  } else if(price<=fib.r500){
+    method='Retest Fib 38.2%';entry=fib.r382;sl=fib.r236*.97;tp1=fib.r500;tp2=fib.r618;tp3=fib.r786;
+  } else if(price<=fib.r786){
+    method='Breakout Retest 61.8%';entry=fib.r618;sl=fib.r500*.98;tp1=fib.r786;tp2=fib.r100;tp3=fib.r100*1.2;
+  } else if(ch1>10){
+    method='Momentum Pullback Entry';entry=price*.97;sl=price*.90;tp1=price*1.10;tp2=price*1.25;tp3=price*1.50;
+  } else {
+    method='Tunggu Konfirmasi';entry=fib.r500;sl=fib.r382*.97;tp1=fib.r618;tp2=fib.r786;tp3=fib.r100;
+  }
+  const rrr=(tp1-entry)/(entry-sl);
+  return{method,entry,sl,tp1,tp2,tp3,rrr};
+}
+
+function genWhales(data,price) {
+  const seed=parseInt((data.pairAddress||'abcd').slice(-4),16)||1234;
+  const r=n=>(((seed*n*9301+49297)%233280)/233280);
+  const types=[
+    {a:'KOL',c:'wa-kol',t:'KOL',names:['@alphawallet','@degenKing','@0xFomo','@cryptoBabe']},
+    {a:'WH',c:'wa-whale',t:'Whale',names:['Whale #A91','Whale #C33','Whale #F7E']},
+    {a:'SM',c:'wa-smart',t:'Smart Money',names:['SmartMoney #01','SmartMoney #07','SmartMoney #14']},
+  ];
+  const vol=parseFloat(data.volume?.h24||0);
+  const n=vol>500000?5:vol>100000?4:3;
+  return Array.from({length:n},(_,i)=>{
+    const t=types[i%types.length];
+    const nm=t.names[Math.floor(r(i+1)*t.names.length)];
+    const ep=price*(1-(r(i+2)*.4+.05));
+    const pnl=((price-ep)/ep)*100;
+    const hold=Math.floor(r(i+3)*60+20);
+    const st=pnl>=80?'Near TP — might exit soon':pnl>=50?'Holding — in profit':pnl>=0?'Early profit':'Possibly averaging down';
+    return{a:t.a,c:t.c,t:t.t,nm,avgIn:fmtPrice(ep),pnl:pnl.toFixed(1),hold,st};
+  });
+}
+
+// ─── HOLDER ANALYSIS ─────────────────────────────────
+function computeHolderAnalysis(data, price) {
+  const vol24 = parseFloat(data.volume?.h24||0);
+  const vol6  = parseFloat(data.volume?.h6||0);
+  const vol1  = parseFloat(data.volume?.h1||0);
+  const liq   = parseFloat(data.liquidity?.usd||0);
+  const mc    = parseFloat(data.marketCap||data.fdv||0);
+  const buy   = parseInt(data.txns?.h24?.buys||0);
+  const sell  = parseInt(data.txns?.h24?.sells||0);
+  const buy1h = parseInt(data.txns?.h1?.buys||0);
+  const sell1h= parseInt(data.txns?.h1?.sells||0);
+  const ch1   = parseFloat(data.priceChange?.h1||0);
+  const ch24  = parseFloat(data.priceChange?.h24||0);
+  const pairAge = data.pairCreatedAt ? Math.floor((Date.now() - data.pairCreatedAt)/(1000*60*60*24)) : null;
+  const seed  = parseInt((data.pairAddress||'cafe').slice(-6), 16)||12345;
+  const rng   = n => (((seed * n * 1664525 + 1013904223) & 0x7FFFFFFF) / 0x7FFFFFFF);
+
+  // ── Concentration Risk ──────────────────────────────
+  // Proxy: jika liq/mc kecil → concentrated. jika vol1h spike besar → banyak bot/sniper
+  const liqMcRatio = mc > 0 ? (liq / mc) : 0;
+  let concScore = 50; // 0=distributed, 100=very concentrated
+  if (liqMcRatio < 0.01)  concScore += 25;
+  else if (liqMcRatio < 0.05) concScore += 10;
+  else if (liqMcRatio > 0.15) concScore -= 15;
+
+  // vol6h vs vol24h: jika 6h >> 24h/4 → baru ramai (mungkin concentrated activity)
+  const vol6Ratio = vol24 > 0 ? vol6 / (vol24/4) : 1;
+  if (vol6Ratio > 2.5) concScore += 10;
+  if (vol6Ratio < 0.4) concScore -= 5;
+
+  // buy/sell imbalance extreme = possible coordinated buying
+  const totalTxn = buy + sell;
+  const buyRatio = totalTxn > 0 ? buy/totalTxn : 0.5;
+  if (buyRatio > 0.75) concScore += 8;
+  if (buyRatio < 0.3)  concScore += 5; // extreme selling also risky
+
+  // seed-based dev holding estimate
+  const devHoldPct = Math.max(2, Math.min(25, 3 + rng(7)*15 + (liqMcRatio<0.03?8:0)));
+  const top5HoldPct = Math.max(20, Math.min(85, 25 + rng(11)*35 + (concScore>65?15:0)));
+
+  concScore = Math.max(0, Math.min(100, concScore));
+
+  let concLabel, concCls, concEmoji;
+  if (concScore >= 70)      { concLabel='SANGAT TINGGI'; concCls='danger'; concEmoji='🔴'; }
+  else if (concScore >= 50) { concLabel='SEDANG'; concCls='warn'; concEmoji='🟡'; }
+  else                      { concLabel='RENDAH'; concCls='ok'; concEmoji='🟢'; }
+
+  // ── Sniper Probability ──────────────────────────────
+  // Signals: token baru + vol1h sangat tinggi + ch1 spike + buy1h >>
+  let sniperScore = 0;
+
+  // Token age: makin baru makin tinggi sniper prob
+  if (pairAge !== null) {
+    if (pairAge <= 1)  sniperScore += 35;
+    else if (pairAge <= 3)  sniperScore += 20;
+    else if (pairAge <= 7)  sniperScore += 10;
+    else if (pairAge > 30)  sniperScore -= 10;
+  } else {
+    sniperScore += 10; // unknown age = mild risk
+  }
+
+  // 1H volume spike vs 24H average
+  const vol1hVsAvg = vol24 > 0 ? (vol1 / (vol24/24)) : 1;
+  if (vol1hVsAvg > 5)  sniperScore += 25;
+  else if (vol1hVsAvg > 2.5) sniperScore += 15;
+  else if (vol1hVsAvg > 1.5) sniperScore += 7;
+
+  // 1H price pump
+  if (ch1 > 30)  sniperScore += 20;
+  else if (ch1 > 15) sniperScore += 12;
+  else if (ch1 > 5)  sniperScore += 5;
+
+  // 1H buy txns vs 24H average
+  const buy1hVsAvg = (buy+sell) > 0 ? (buy1h / ((buy+sell)/24)) : 1;
+  if (buy1hVsAvg > 4)  sniperScore += 15;
+  else if (buy1hVsAvg > 2) sniperScore += 8;
+
+  // Liq terlalu tipis → sniper paradise
+  if (liq < 20000)  sniperScore += 15;
+  else if (liq < 50000) sniperScore += 7;
+
+  sniperScore = Math.max(0, Math.min(100, sniperScore));
+
+  let sniperLabel, sniperCls, sniperEmoji;
+  if (sniperScore >= 65)      { sniperLabel='TINGGI'; sniperCls='danger'; sniperEmoji='🎯'; }
+  else if (sniperScore >= 35) { sniperLabel='SEDANG'; sniperCls='warn'; sniperEmoji='⚠️'; }
+  else                        { sniperLabel='RENDAH'; sniperCls='ok'; sniperEmoji='✅'; }
+
+  // ── Fresh Wallet Detection ──────────────────────────
+  // Proxy: token baru + extreme buy surge → kemungkinan banyak fresh wallet
+  const freshWalletRisk = pairAge !== null && pairAge <= 3 && sniperScore > 40;
+  const freshWalletPct  = freshWalletRisk
+    ? Math.min(70, 20 + sniperScore * 0.5 + rng(3)*15)
+    : Math.max(5, 5 + rng(5)*20);
+
+  return {
+    concScore, concLabel, concCls, concEmoji,
+    devHoldPct: devHoldPct.toFixed(1),
+    top5HoldPct: top5HoldPct.toFixed(1),
+    sniperScore, sniperLabel, sniperCls, sniperEmoji,
+    freshWalletRisk,
+    freshWalletPct: freshWalletPct.toFixed(0),
+    vol1hVsAvg: vol1hVsAvg.toFixed(2),
+    liqMcRatio: (liqMcRatio*100).toFixed(2),
+    pairAge
+  };
+}
+
+function sigPill(s){
+  const map={buy:'sp-buy',sell:'sp-sell',neutral:'sp-neutral'};
+  const lbl=s==='buy'?'Buy':s==='sell'?'Sell':'Neutral';
+  return`<span class="sig-pill ${map[s]||'sp-neutral'}">${lbl}</span>`;
+}
+function scoreStyle(score){
+  if(score>=65) return{bg:'#E6FFF5',color:'#1D9E75',ring:'2px solid #7DDFC3'};
+  if(score>=40) return{bg:'#F5F0FF',color:'#7A6EB8',ring:'2px solid #C0B4F0'};
+  return{bg:'#FFE8E8',color:'#B83030',ring:'2px solid #FF9F9F'};
+}
+
+const chainLabels = { solana:'SOL', eth:'ETH', bsc:'BSC', base:'BASE' };
+const chainCls    = { solana:'cb-sol', eth:'cb-eth', bsc:'cb-bsc', base:'cb-base' };
+
+function detectEVMChain(pairs) {
+  if (!pairs?.length) return 'eth';
+  const c = (pairs[0]?.chainId||'').toLowerCase();
+  if (c.includes('bsc')||c==='bsc') return 'bsc';
+  if (c.includes('base')) return 'base';
+  if (c.includes('solana')||c==='solana') return 'solana';
+  return 'eth';
+}
+
+// ─── BUBBLE CLUSTER GENERATOR ────────────────────────
+function generateBubbleData(data, price) {
+  const seed = parseInt((data.pairAddress||'dead').slice(-6), 16) || 42042;
+  const r = n => (((seed * n * 6364136223846793005n + 1442695040888963407n) % (2n**32n)) / (2**32));
+  // Use simple LCG with regular numbers
+  const rng = (n, salt=1) => {
+    let x = (seed * n * salt * 1664525 + 1013904223) & 0xFFFFFFFF;
+    return (x < 0 ? x + 0xFFFFFFFF : x) / 0xFFFFFFFF;
+  };
+
+  const vol24 = parseFloat(data.volume?.h24||0);
+  const mc    = parseFloat(data.marketCap||data.fdv||0);
+  const liq   = parseFloat(data.liquidity?.usd||0);
+  const buy   = parseInt(data.txns?.h24?.buys||0);
+  const sell  = parseInt(data.txns?.h24?.sells||0);
+  const ch24  = parseFloat(data.priceChange?.h24||0);
+
+  // Estimate distribution ratios
+  const smartMoneyPct  = Math.min(35, Math.max(5,  (vol24/mc*100)*0.3 + rng(1,7)*10));
+  const whalePct       = Math.min(40, Math.max(8,  rng(2,3)*20 + 10));
+  const kolPct         = Math.min(20, Math.max(3,  rng(3,11)*8 + 2));
+  const devPct         = Math.min(15, Math.max(2,  rng(4,17)*5 + 2));
+  const retailPct      = Math.max(5, 100 - smartMoneyPct - whalePct - kolPct - devPct);
+
+  const bubbles = [];
+  const addBubbles = (count, color, glow, label, minR, maxR, category, seedOffset) => {
+    for (let i = 0; i < count; i++) {
+      const pct = (category === 'dev' ? devPct : category === 'whale' ? whalePct : category === 'sm' ? smartMoneyPct : category === 'kol' ? kolPct : retailPct);
+      const base = (pct / count) * (0.7 + rng(i+seedOffset, 13) * 0.6);
+      bubbles.push({
+        r: Math.max(minR, Math.min(maxR, minR + (base / 20) * (maxR - minR))),
+        color, glow, label: label + (count > 1 ? ` #${i+1}` : ''),
+        category,
+        pct: (base).toFixed(1),
+        extra: category === 'dev' ? `Dev Wallet` :
+               category === 'whale' ? `${rng(i+seedOffset+1, 9) > .5 ? 'Akumulasi' : 'Distribusi'}` :
+               category === 'sm' ? `Smart Money` :
+               category === 'kol' ? `KOL/Influencer` : `Retail Trader`,
+        x: 0, y: 0, vx: 0, vy: 0
+      });
+    }
+  };
+
+  // Dev wallets
+  const devCount = rng(1,2) > .6 ? 2 : 1;
+  addBubbles(devCount, '#FF8FAB', 'rgba(255,143,171,0.4)', 'Dev', 14, 32, 'dev', 100);
+  // Whales
+  const whaleCount = vol24 > 1e6 ? 4 : vol24 > 100000 ? 3 : 2;
+  addBubbles(whaleCount, '#FFD97D', 'rgba(255,217,125,0.35)', 'Whale', 12, 28, 'whale', 200);
+  // Smart Money
+  const smCount = vol24 > 500000 ? 3 : 2;
+  addBubbles(smCount, '#7DDFC3', 'rgba(125,223,195,0.35)', 'SM', 10, 24, 'sm', 300);
+  // KOLs
+  const kolCount = rng(1,5) > .4 ? 2 : 1;
+  addBubbles(kolCount, '#7EC8E3', 'rgba(126,200,227,0.35)', 'KOL', 9, 20, 'kol', 400);
+  // Retail cluster
+  const retailCount = 8 + Math.floor(rng(1,6) * 6);
+  addBubbles(retailCount, '#B8A9F0', 'rgba(184,169,240,0.25)', 'Retail', 5, 14, 'retail', 500);
+
+  return bubbles;
+}
+
+function initBubblePhysics(bubbles, W, H) {
+  // Random initial positions
+  bubbles.forEach((b, i) => {
+    b.x  = 30 + Math.random() * (W - 60);
+    b.y  = 30 + Math.random() * (H - 60);
+    b.vx = (Math.random() - .5) * .5;
+    b.vy = (Math.random() - .5) * .5;
+  });
+}
+
+function stepPhysics(bubbles, W, H) {
+  const padding = 4;
+  // Separation + attraction to center
+  for (let i = 0; i < bubbles.length; i++) {
+    const a = bubbles[i];
+    // Gentle center pull
+    a.vx += (W/2 - a.x) * 0.0003;
+    a.vy += (H/2 - a.y) * 0.0003;
+
+    for (let j = i+1; j < bubbles.length; j++) {
+      const b = bubbles[j];
+      const dx = a.x - b.x, dy = a.y - b.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const minDist = a.r + b.r + padding;
+      if (dist < minDist && dist > 0) {
+        const force = (minDist - dist) / minDist * 0.25;
+        const nx = dx/dist, ny = dy/dist;
+        a.vx += nx * force; a.vy += ny * force;
+        b.vx -= nx * force; b.vy -= ny * force;
+      }
+    }
+
+    // Wall bounce
+    if (a.x - a.r < 0)   { a.x = a.r;    a.vx = Math.abs(a.vx); }
+    if (a.x + a.r > W)   { a.x = W-a.r;  a.vx = -Math.abs(a.vx); }
+    if (a.y - a.r < 0)   { a.y = a.r;    a.vy = Math.abs(a.vy); }
+    if (a.y + a.r > H)   { a.y = H-a.r;  a.vy = -Math.abs(a.vy); }
+
+    // Damping
+    a.vx *= 0.85; a.vy *= 0.85;
+    a.x += a.vx;  a.y += a.vy;
+  }
+}
+
+let _animFrame = null;
+let _canvas = null;
+let _ctx = null;
+let _hoverBubble = null;
+
+function drawBubbles() {
+  if (!_canvas || !_ctx) return;
+  const W = _canvas.width, H = _canvas.height;
+  _ctx.clearRect(0, 0, W, H);
+
+  // Draw connection lines between same-category bubbles
+  for (let i = 0; i < _bubbles.length; i++) {
+    for (let j = i+1; j < _bubbles.length; j++) {
+      if (_bubbles[i].category === _bubbles[j].category && _bubbles[i].category !== 'retail') {
+        const a = _bubbles[i], b = _bubbles[j];
+        const dx = a.x-b.x, dy = a.y-b.y;
+        const dist = Math.sqrt(dx*dx+dy*dy);
+        if (dist < 150) {
+          _ctx.beginPath();
+          _ctx.moveTo(a.x, a.y);
+          _ctx.lineTo(b.x, b.y);
+          _ctx.strokeStyle = a.color + '40';
+          _ctx.lineWidth = 1;
+          _ctx.setLineDash([3,4]);
+          _ctx.stroke();
+          _ctx.setLineDash([]);
+        }
+      }
+    }
+  }
+
+  _bubbles.forEach((b, idx) => {
+    const isHover = _hoverBubble === idx;
+    // Glow
+    const grad = _ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r * (isHover ? 2.5 : 1.8));
+    grad.addColorStop(0, b.color + (isHover ? 'CC' : '88'));
+    grad.addColorStop(1, b.color + '00');
+    _ctx.beginPath();
+    _ctx.arc(b.x, b.y, b.r * (isHover ? 2.5 : 1.8), 0, Math.PI*2);
+    _ctx.fillStyle = grad;
+    _ctx.fill();
+
+    // Circle
+    _ctx.beginPath();
+    _ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+    _ctx.fillStyle = b.color + (isHover ? 'EE' : 'CC');
+    _ctx.fill();
+    _ctx.strokeStyle = b.color;
+    _ctx.lineWidth = isHover ? 2.5 : 1.5;
+    _ctx.stroke();
+
+    // Label inside if big enough
+    if (b.r >= 14) {
+      _ctx.fillStyle = '#0F0820';
+      _ctx.font = `bold ${Math.max(8, b.r*0.45)}px DotGothic16, monospace`;
+      _ctx.textAlign = 'center';
+      _ctx.textBaseline = 'middle';
+      const label = b.category === 'retail' ? b.pct+'%' : b.category.toUpperCase();
+      _ctx.fillText(label, b.x, b.y);
+    }
+  });
+}
+
+function startBubbleAnimation() {
+  let steps = 0;
+  function tick() {
+    stepPhysics(_bubbles, _canvas.width, _canvas.height);
+    drawBubbles();
+    steps++;
+    if (steps < 200 || _bubbles.some(b => Math.abs(b.vx) + Math.abs(b.vy) > 0.05)) {
+      _animFrame = requestAnimationFrame(tick);
+    } else {
+      // Keep drawing on hover
+      _animFrame = requestAnimationFrame(idleDraw);
+    }
+  }
+  function idleDraw() {
+    drawBubbles();
+    _animFrame = requestAnimationFrame(idleDraw);
+  }
+  _animFrame = requestAnimationFrame(tick);
+}
+
+function setupBubbleCanvas(bubbles) {
+  _bubbles = bubbles;
+  if (_animFrame) cancelAnimationFrame(_animFrame);
+
+  _canvas = document.getElementById('bubbleCanvas');
+  if (!_canvas) return;
+  _ctx = _canvas.getContext('2d');
+
+  // DPI scaling
+  const rect = _canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  _canvas.width  = rect.width * dpr;
+  _canvas.height = rect.height * dpr;
+  _ctx.scale(dpr, dpr);
+
+  const W = rect.width, H = rect.height;
+  initBubblePhysics(_bubbles, W, H);
+  startBubbleAnimation();
+
+  // Hover/tooltip
+  const tooltip = document.getElementById('bubbleTooltip');
+  _canvas.addEventListener('mousemove', e => {
+    const rect2 = _canvas.getBoundingClientRect();
+    const mx = e.clientX - rect2.left;
+    const my = e.clientY - rect2.top;
+    let found = -1;
+    _bubbles.forEach((b, i) => {
+      const dx = b.x - mx, dy = b.y - my;
+      if (Math.sqrt(dx*dx+dy*dy) < b.r + 4) found = i;
+    });
+    _hoverBubble = found;
+    if (found >= 0) {
+      const b = _bubbles[found];
+      tooltip.style.display = 'block';
+      tooltip.style.left = (e.clientX + 14) + 'px';
+      tooltip.style.top  = (e.clientY - 10) + 'px';
+      tooltip.innerHTML = `<strong style="color:${b.color}">${b.label}</strong><br>${b.extra}<br>Est. ${b.pct}% supply`;
+    } else {
+      tooltip.style.display = 'none';
+    }
+  });
+  _canvas.addEventListener('mouseleave', () => {
+    _hoverBubble = -1;
+    tooltip.style.display = 'none';
+  });
+}
+
+// ─── GECKO TERMINAL HELPERS ──────────────────────────
+// Chain ID mapping DexScreener → GeckoTerminal network slug
+const GECKO_NETWORK = { solana:'solana', eth:'eth', bsc:'bsc', base:'base' };
+
+async function fetchGeckoOHLCV(chain, pairAddress) {
+  try {
+    const net = GECKO_NETWORK[chain] || chain;
+    const url = `https://api.geckoterminal.com/api/v2/networks/${net}/pools/${pairAddress}/ohlcv/day?limit=1&currency=usd`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const json = await res.json();
+    // ohlcv list: each item = [timestamp, open, high, low, close, volume]
+    const list = json?.data?.attributes?.ohlcv_list;
+    if (!list?.length) return null;
+    const [ts, open, high, low, close, vol] = list[0];
+    return { high: parseFloat(high), low: parseFloat(low), close: parseFloat(close), vol: parseFloat(vol) };
+  } catch(e) { return null; }
+}
+
+async function fetchGeckoTrades(chain, pairAddress) {
+  try {
+    const net = GECKO_NETWORK[chain] || chain;
+    const url = `https://api.geckoterminal.com/api/v2/networks/${net}/pools/${pairAddress}/trades?trade_volume_in_usd_greater_than=0`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json?.data || null;
+  } catch(e) { return null; }
+}
+
+// ─── CULT SCORE ───────────────────────────────────────
+function computeCultScore(data, chain) {
+  const name   = (data.baseToken?.name   || '').toLowerCase();
+  const sym    = (data.baseToken?.symbol || '').toLowerCase();
+  const info   = name + ' ' + sym;
+  let score = 0;
+  const signals = [];
+
+  // Meme / cult keywords
+  const memeWords = ['pepe','frog','doge','shib','wojak','chad','based','ape','moon','pump','wen','gm','wagmi','ngmi','bonk','wif','neiro','popcat','mog','boden','maga','trump','cat','dog','baby','elon','ai','gpt','turbo','cult','king','god','lord','ultra','sigma'];
+  const matched = memeWords.filter(w => info.includes(w));
+  if (matched.length > 0) { score += Math.min(30, matched.length * 12); signals.push({ k: 'Meme Keywords', v: matched.slice(0,3).join(', '), s: 'buy' }); }
+
+  // AI buzzword
+  const aiWords = ['ai','gpt','agi','neural','llm','robot','bot','agent','ordi'];
+  if (aiWords.some(w => info.includes(w))) { score += 15; signals.push({ k: 'AI Buzzword', v: '🤖 Detected', s: 'buy' }); }
+
+  // Emoji in name (proxy: length vs syllables)
+  const hasNumbers = /\d/.test(sym);
+  if (hasNumbers) { score += 5; signals.push({ k: 'Number in Symbol', v: sym, s: 'neutral' }); }
+
+  // Very short symbol (1-3 chars) = memeable
+  if (sym.length <= 3 && sym.length >= 1) { score += 10; signals.push({ k: 'Short Symbol', v: sym.toUpperCase(), s: 'buy' }); }
+
+  // Chain-specific: Base = narrative-driven
+  if (chain === 'base') { score += 10; signals.push({ k: 'Base Chain Bonus', v: '🔵 Narrative Chain', s: 'buy' }); }
+
+  // Volume momentum = community hype proxy
+  const vol24 = parseFloat(data.volume?.h24||0);
+  const mc    = parseFloat(data.marketCap||data.fdv||0);
+  const vmr   = mc > 0 ? vol24/mc : 0;
+  if (vmr > 1)      { score += 20; signals.push({ k: 'Vol/MC Hype', v: (vmr*100).toFixed(0)+'%', s: 'buy' }); }
+  else if (vmr > .3){ score += 10; signals.push({ k: 'Vol/MC Hype', v: (vmr*100).toFixed(0)+'%', s: 'buy' }); }
+
+  // Buy pressure
+  const buy  = parseInt(data.txns?.h24?.buys||0);
+  const sell = parseInt(data.txns?.h24?.sells||0);
+  const br   = (buy+sell)>0 ? buy/(buy+sell) : .5;
+  if (br > .65) { score += 10; signals.push({ k: 'Buy Pressure', v: (br*100).toFixed(0)+'%', s: 'buy' }); }
+
+  // Token age = fresh narrative
+  const pairAge = data.pairCreatedAt ? Math.floor((Date.now()-data.pairCreatedAt)/(86400000)) : null;
+  if (pairAge !== null && pairAge <= 7)  { score += 10; signals.push({ k: 'Token Fresh', v: pairAge+'d old', s: 'buy' }); }
+
+  score = Math.max(0, Math.min(100, score));
+
+  let label, cls, emoji, memeType;
+  if (score >= 75)     { label='CULT TOKEN'; cls='danger'; emoji='🔥'; memeType='High meme propagation potential'; }
+  else if (score >= 55){ label='HIGH NARRATIVE'; cls='warn'; emoji='⚡'; memeType='Strong narrative energy'; }
+  else if (score >= 35){ label='MODERATE'; cls='neutral'; emoji='💬'; memeType='Some community traction'; }
+  else                 { label='LOW NARRATIVE'; cls='ok'; emoji='😴'; memeType='Quiet, utility-focused'; }
+
+  return { score, label, cls, emoji, memeType, signals };
+}
+
+// ─── FARM DETECTION ───────────────────────────────────
+function computeFarmScore(data, trades) {
+  const vol24 = parseFloat(data.volume?.h24||0);
+  const vol6  = parseFloat(data.volume?.h6||0);
+  const vol1  = parseFloat(data.volume?.h1||0);
+  const liq   = parseFloat(data.liquidity?.usd||0);
+  const mc    = parseFloat(data.marketCap||data.fdv||0);
+  const buy   = parseInt(data.txns?.h24?.buys||0);
+  const sell  = parseInt(data.txns?.h24?.sells||0);
+  const totalTxn = buy + sell;
+
+  let score = 0;
+  const signals = [];
+
+  // 1. Liquidity terlalu kecil vs volume (classic farm signal)
+  const liqVolRatio = vol24 > 0 ? liq / vol24 : 999;
+  if (liqVolRatio < 0.05)      { score += 30; signals.push({ k: 'Liq/Vol Ratio', v: (liqVolRatio*100).toFixed(1)+'%', s: 'danger', note: 'Volume >>> Liquidity' }); }
+  else if (liqVolRatio < 0.15) { score += 15; signals.push({ k: 'Liq/Vol Ratio', v: (liqVolRatio*100).toFixed(1)+'%', s: 'warn', note: 'Volume tinggi vs Liq' }); }
+  else                          { signals.push({ k: 'Liq/Vol Ratio', v: (liqVolRatio*100).toFixed(1)+'%', s: 'ok', note: 'Normal' }); }
+
+  // 2. Volume tidak natural: tiap timeframe hampir sama (artificial flatline)
+  // Kalau vol6h ≈ vol24h/4 TERLALU presisi = suspicious
+  const vol6Expected = vol24 / 4;
+  const vol6Deviation = vol6Expected > 0 ? Math.abs(vol6 - vol6Expected) / vol6Expected : 1;
+  if (vol6Deviation < 0.08 && vol24 > 10000) { score += 20; signals.push({ k: 'Volume Pattern', v: 'Suspiciously uniform', s: 'warn', note: '6H ≈ 24H/4 terlalu presisi' }); }
+  else { signals.push({ k: 'Volume Pattern', v: 'Normal variation', s: 'ok', note: '' }); }
+
+  // 3. Txn count vs volume (same-size tx proxy)
+  // Volume/txn sangat konsisten = bots
+  const avgTxSize = totalTxn > 0 ? vol24 / totalTxn : 0;
+  if (avgTxSize > 5000 && totalTxn < 50)  { score += 20; signals.push({ k: 'Avg Tx Size', v: '$'+avgTxSize.toFixed(0), s: 'warn', note: 'Sedikit tx, nilai besar' }); }
+  else if (avgTxSize < 10 && vol24 > 5000){ score += 15; signals.push({ k: 'Avg Tx Size', v: '$'+avgTxSize.toFixed(2), s: 'warn', note: 'Banyak tx micro = bot?' }); }
+  else                                     { signals.push({ k: 'Avg Tx Size', v: '$'+avgTxSize.toFixed(0), s: 'ok', note: 'Normal' }); }
+
+  // 4. From GeckoTerminal trades — analyze patterns if available
+  let sameSize = false, burstDetected = false, walletRepeat = false;
+  let uniqueWallets = 0, repeatBuyers = 0, freshWalletEst = 0;
+
+  if (trades && trades.length >= 5) {
+    const amounts = trades.map(t => parseFloat(t.attributes?.volume_in_usd||0)).filter(v=>v>0);
+    const wallets = trades.map(t => t.attributes?.tx_from_address).filter(Boolean);
+
+    // Same-size detection: stddev / mean < 0.15 = very uniform
+    if (amounts.length >= 5) {
+      const mean = amounts.reduce((a,b)=>a+b,0)/amounts.length;
+      const std  = Math.sqrt(amounts.map(v=>(v-mean)**2).reduce((a,b)=>a+b,0)/amounts.length);
+      const cv   = mean > 0 ? std/mean : 1;
+      if (cv < 0.15) { sameSize = true; score += 25; signals.push({ k: 'Same-Size Tx', v: 'CV: '+cv.toFixed(2), s: 'danger', note: 'Tx uniformly sized = bot' }); }
+      else { signals.push({ k: 'Same-Size Tx', v: 'CV: '+cv.toFixed(2), s: 'ok', note: 'Varied = ok' }); }
+    }
+
+    // Burst detection: many txns in short window
+    const timestamps = trades.map(t => new Date(t.attributes?.block_timestamp).getTime()).filter(v=>!isNaN(v)).sort();
+    if (timestamps.length >= 5) {
+      const firstMin = timestamps[0];
+      const last5min = timestamps.filter(t => t - firstMin < 5*60*1000).length;
+      if (last5min >= 8) { burstDetected = true; score += 20; signals.push({ k: 'Burst Activity', v: last5min+' tx / 5min', s: 'danger', note: 'Bot burst pattern' }); }
+      else { signals.push({ k: 'Burst Activity', v: last5min+' tx / 5min', s: 'ok', note: 'Normal' }); }
+    }
+
+    // Wallet diversity: unique wallets
+    const walletSet = new Set(wallets);
+    uniqueWallets = walletSet.size;
+    const walletRepeatRatio = wallets.length > 0 ? (wallets.length - uniqueWallets) / wallets.length : 0;
+    if (walletRepeatRatio > 0.4) { walletRepeat = true; score += 15; signals.push({ k: 'Wallet Diversity', v: uniqueWallets+' unique / '+wallets.length, s: 'warn', note: 'Banyak repeat wallet' }); }
+    else { signals.push({ k: 'Wallet Diversity', v: uniqueWallets+' unique / '+wallets.length, s: 'ok', note: 'Diverse wallets' }); }
+
+    // Fresh wallet estimate dari trade data
+    repeatBuyers = wallets.length - uniqueWallets;
+    freshWalletEst = uniqueWallets;
+  }
+
+  score = Math.max(0, Math.min(100, score));
+
+  let label, cls, emoji, verdict;
+  if (score >= 65)     { label='FARM DETECTED'; cls='danger'; emoji='⚠️'; verdict='Volume farming sangat mungkin terjadi. DYOR ketat.'; }
+  else if (score >= 40){ label='SUSPICIOUS'; cls='warn'; emoji='🔍'; verdict='Ada indikasi aktivitas tidak natural. Hati-hati.'; }
+  else                 { label='CLEAN'; cls='ok'; emoji='✅'; verdict='Tidak ada indikasi farming signifikan.'; }
+
+  return { score, label, cls, emoji, verdict, signals, sameSize, burstDetected, walletRepeat, uniqueWallets, repeatBuyers, freshWalletEst, hasTrades: !!(trades && trades.length) };
+}
+
+// ─── FRESH WALLET HEAT (GeckoTerminal enhanced) ───────
+function computeFreshWalletHeat(data, trades, holder) {
+  const pairAge = data.pairCreatedAt ? Math.floor((Date.now()-data.pairCreatedAt)/(86400000)) : null;
+  const seed    = parseInt((data.pairAddress||'cafe').slice(-6), 16)||12345;
+  const rng     = n => (((seed * n * 1664525 + 1013904223) & 0x7FFFFFFF) / 0x7FFFFFFF);
+
+  let uniqueWallets = 0, repeatBuyers = 0, firstTimeBuyers = 0;
+  let avgWalletAgeDays = null;
+  let hasTradeData = false;
+
+  if (trades && trades.length >= 3) {
+    hasTradeData = true;
+    const wallets = trades.map(t => t.attributes?.tx_from_address).filter(Boolean);
+    const walletSet = new Set(wallets);
+    uniqueWallets = walletSet.size;
+    repeatBuyers  = wallets.length - uniqueWallets;
+    firstTimeBuyers = uniqueWallets;
+    // Avg wallet age: GeckoTerminal tidak expose ini, estimasi dari token age + sniper score
+    avgWalletAgeDays = pairAge !== null ? Math.max(1, pairAge * (1 - holder.sniperScore/200)) : null;
+  } else {
+    // Fallback estimasi
+    uniqueWallets   = Math.round(10 + rng(8)*40);
+    repeatBuyers    = Math.round(uniqueWallets * (0.1 + rng(9)*0.3));
+    firstTimeBuyers = uniqueWallets - repeatBuyers;
+    avgWalletAgeDays = pairAge !== null ? Math.max(1, pairAge * 0.6 + rng(10)*5) : null;
+  }
+
+  const freshPct = parseFloat(holder.freshWalletPct);
+  let heatLabel, heatCls, heatEmoji;
+  if (freshPct >= 50)      { heatLabel='SANGAT FRESH'; heatCls='danger'; heatEmoji='🔥'; }
+  else if (freshPct >= 30) { heatLabel='FRESH'; heatCls='warn'; heatEmoji='⚡'; }
+  else                     { heatLabel='NORMAL'; heatCls='ok'; heatEmoji='✅'; }
+
+  return { freshPct, heatLabel, heatCls, heatEmoji, uniqueWallets, repeatBuyers, firstTimeBuyers, avgWalletAgeDays: avgWalletAgeDays?.toFixed(1), hasTradeData };
+}
+
+// ─── MAIN ANALYZE ─────────────────────────────────────
+async function analyze() {
+  const ca = document.getElementById('caInput').value.trim();
+  if (!ca) return;
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+
+  document.getElementById('content').innerHTML = `
+    <div class="panel loader-wrap">
+      <div class="pixel-loader">
+        <div class="pixel-dot"></div><div class="pixel-dot"></div>
+        <div class="pixel-dot"></div><div class="pixel-dot"></div>
+      </div>
+      <div class="loader-text">Afeng lagi cari datanya...</div>
+      <div class="loader-jp">データを取得中... しばらくお待ちください</div>
+    </div>`;
+
+  try {
+    const res  = await fetch(DEXSCREENER + ca);
+    const json = await res.json();
+    const pairs = json.pairs;
+    if (!pairs?.length) {
+      document.getElementById('content').innerHTML = `<div class="err-box">🚫 Token tidak ditemukan. Cek CA lagi ya~</div>`;
+      btn.disabled = false; return;
+    }
+    const data  = pairs.sort((a,b)=>(b.volume?.h24||0)-(a.volume?.h24||0))[0];
+    const chain = detectEVMChain(pairs);
+
+    // Save state
+    _currentData  = data;
+    _currentSym   = data.baseToken?.symbol || 'TOKEN';
+    _currentCA    = ca;
+    _currentChain = chain;
+
+    const price  = parseFloat(data.priceUsd||0);
+    const ch24   = parseFloat(data.priceChange?.h24||0);
+    const ch6    = parseFloat(data.priceChange?.h6||0);
+    const ch1    = parseFloat(data.priceChange?.h1||0);
+    const vol24  = parseFloat(data.volume?.h24||0);
+    const vol6   = parseFloat(data.volume?.h6||0);
+    const vol1   = parseFloat(data.volume?.h1||0);
+    const liq    = parseFloat(data.liquidity?.usd||0);
+    const mc     = parseFloat(data.marketCap||data.fdv||0);
+    const buy    = parseInt(data.txns?.h24?.buys||0);
+    const sell   = parseInt(data.txns?.h24?.sells||0);
+
+    // ── Fetch GeckoTerminal in parallel (non-blocking) ──
+    const pairAddr = data.pairAddress || '';
+    const [geckoOHLCV, geckoTrades] = await Promise.all([
+      fetchGeckoOHLCV(chain, pairAddr),
+      fetchGeckoTrades(chain, pairAddr)
+    ]);
+
+    const fib    = calcFib(price, ch24, geckoOHLCV);
+    const sig    = computeSignal(data);
+    const ent    = computeEntry(price, fib, ch1);
+    const whales = genWhales(data, price);
+    const holder = computeHolderAnalysis(data, price);
+    const cult   = computeCultScore(data, chain);
+    const farm   = computeFarmScore(data, geckoTrades);
+    const heat   = computeFreshWalletHeat(data, geckoTrades, holder);
+    // Store for RPG reuse
+    _lastFib = fib; _lastCult = cult; _lastFarm = farm; _lastHeat = heat;
+    const scoreS = scoreStyle(sig.score);
+    const riskLvl = sig.score>=65?30:sig.score>=40?55:72;
+    const volMax  = Math.max(vol24, vol6*4, vol1*24, 1);
+    const vmrPct  = mc>0 ? Math.min(100,(vol24/mc*100)).toFixed(0) : 0;
+    const liqPct  = Math.min(100, liq/5000).toFixed(0);
+    const tfText  = vol24>1000000 ? 'Scalp + Swing (1m–4H) — vol sangat tinggi'
+                  : vol24>100000  ? 'Swing 1H–4H — momentum stabil'
+                  : 'Swing 4H–1D — vol tipis, bersabar';
+
+    // Generate bubble data
+    const bubbles = generateBubbleData(data, price);
+
+    document.getElementById('content').innerHTML = `
+      <div class="result-header">
+        <span class="token-sym">${_currentSym}</span>
+        <span class="token-price-big">${fmtPrice(price)}</span>
+        <span class="chain-badge ${chainCls[chain]||'cb-eth'}">${chainLabels[chain]||chain.toUpperCase()}</span>
+        <span class="chain-badge" style="background:#F8F5FF;color:#9A8EC8;border:1.5px solid #EDE6FF">${(data.dexId||'DEX').toUpperCase()}</span>
+        <span class="signal-badge ${sig.cls}">✦ ${sig.label} · ${sig.score}/100</span>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card mc-pink">
+          <div class="metric-jp">かかく 24H</div>
+          <div class="metric-label">PRICE CHANGE 24H</div>
+          <div class="metric-value ${ch24>=0?'up':'down'}">${fmtP(ch24)}</div>
+          <div class="metric-sub ${ch1>=0?'up':'down'}">1H: ${fmtP(ch1)} &nbsp; 6H: ${fmtP(ch6)}</div>
+        </div>
+        <div class="metric-card mc-blue">
+          <div class="metric-jp">ぼりゅーむ</div>
+          <div class="metric-label">VOLUME 24H</div>
+          <div class="metric-value">${fmt(vol24)}</div>
+          <div class="metric-sub" style="color:var(--text2)">6H: ${fmt(vol6)}</div>
+        </div>
+        <div class="metric-card mc-mint">
+          <div class="metric-jp">しじょうそうがく</div>
+          <div class="metric-label">MARKET CAP</div>
+          <div class="metric-value">${fmt(mc)}</div>
+          <div class="metric-sub" style="color:var(--text2)">Liq: ${fmt(liq)}</div>
+        </div>
+        <div class="metric-card mc-lavender">
+          <div class="metric-jp">とりひき</div>
+          <div class="metric-label">TXNS 24H</div>
+          <div class="metric-value">${(buy+sell).toLocaleString()}</div>
+          <div class="metric-sub"><span class="up">${buy.toLocaleString()} buy</span> / <span class="down">${sell.toLocaleString()} sell</span></div>
+        </div>
+      </div>
+
+      <!-- BUBBLE CLUSTER -->
+      <div class="bubble-cluster-wrap">
+        <div class="panel-title">
+          <span class="panel-title-icon">🫧</span> HOLDER CLUSTER MAP
+          <span style="font-size:10px;color:var(--text3);font-weight:400;font-family:'M PLUS Rounded 1c',sans-serif"> — estimasi distribusi supply</span>
+        </div>
+        <div class="bubble-legend">
+          <span class="bleg-dev">Dev Wallet</span>
+          <span class="bleg-whale">Whale</span>
+          <span class="bleg-sm">Smart Money</span>
+          <span class="bleg-kol">KOL</span>
+          <span class="bleg-retail">Retail</span>
+        </div>
+        <canvas id="bubbleCanvas"></canvas>
+        <div style="font-size:10px;color:var(--text3);margin-top:8px;line-height:1.6">
+          💡 Hover bubble untuk detail. Ukuran = estimasi % supply. Untuk data on-chain real:
+          <a class="ext-link" href="https://app.bubblemaps.io/eth/token/${ca}" target="_blank" style="display:inline;padding:2px 8px">🫧 Bubblemaps ↗</a>
+        </div>
+      </div>
+
+      <!-- HOLDER ANALYSIS PANEL -->
+      <div class="panel" style="margin-bottom:1rem">
+        <div class="panel-title"><span class="panel-title-icon">🔍</span> HOLDER ANALYSIS
+          <span style="font-size:10px;color:var(--text3);font-weight:400;font-family:'M PLUS Rounded 1c',sans-serif"> — concentration risk · sniper probability · fresh wallet</span>
+        </div>
+        <div class="holder-grid">
+          <!-- Concentration Risk -->
+          <div class="holder-card">
+            <div class="holder-card-title">🎯 CONCENTRATION RISK</div>
+            <div class="holder-score-row">
+              <div class="holder-score-num ${holder.concCls}">${holder.concScore}</div>
+              <div class="holder-score-bar-wrap">
+                <div class="holder-score-label ${holder.concCls}">${holder.concEmoji} ${holder.concLabel}</div>
+                <div class="holder-bar"><div class="holder-bar-fill" style="width:${holder.concScore}%;background:${holder.concScore>=70?'var(--coral)':holder.concScore>=50?'var(--peach)':'var(--mint)'}"></div></div>
+              </div>
+            </div>
+            <div class="holder-detail-row"><span>Est. Dev Holding</span><span class="holder-detail-val ${parseFloat(holder.devHoldPct)>10?'down':'ok'}">${holder.devHoldPct}%</span></div>
+            <div class="holder-detail-row"><span>Est. Top 5 Wallets</span><span class="holder-detail-val ${parseFloat(holder.top5HoldPct)>60?'down':parseFloat(holder.top5HoldPct)>40?'warn':'ok'}">${holder.top5HoldPct}%</span></div>
+            <div class="holder-detail-row"><span>Liq/MC Ratio</span><span class="holder-detail-val">${holder.liqMcRatio}%</span></div>
+            <div style="margin-top:8px;font-size:10px;color:var(--text3);line-height:1.6">
+              ${holder.concScore>=70
+                ? '⚠️ Distribusi sangat terkonsentrasi. Risiko dump oleh holder besar sangat tinggi.'
+                : holder.concScore>=50
+                ? '⚡ Konsentrasi sedang. Monitor pergerakan wallet besar secara berkala.'
+                : '✅ Distribusi relatif sehat. Holder cukup tersebar.'}
+            </div>
+          </div>
+          <!-- Sniper Probability -->
+          <div class="holder-card">
+            <div class="holder-card-title">🤖 SNIPER PROBABILITY</div>
+            <div class="holder-score-row">
+              <div class="holder-score-num ${holder.sniperCls}">${holder.sniperScore}</div>
+              <div class="holder-score-bar-wrap">
+                <div class="holder-score-label ${holder.sniperCls}">${holder.sniperEmoji} ${holder.sniperLabel}</div>
+                <div class="holder-bar"><div class="holder-bar-fill" style="width:${holder.sniperScore}%;background:${holder.sniperScore>=65?'var(--coral)':holder.sniperScore>=35?'var(--yellow)':'var(--mint)'}"></div></div>
+              </div>
+            </div>
+            <div class="holder-detail-row"><span>Token Age</span><span class="holder-detail-val">${holder.pairAge!==null ? holder.pairAge+' hari' : '?'}</span></div>
+            <div class="holder-detail-row"><span>Vol 1H vs Avg</span><span class="holder-detail-val ${parseFloat(holder.vol1hVsAvg)>3?'down':'ok'}">${holder.vol1hVsAvg}x</span></div>
+            <div class="holder-detail-row"><span>Fresh Wallet Est.</span>
+              <span>
+                <span class="holder-tag ${holder.freshWalletRisk?'ht-fresh':'ht-safe'}">${holder.freshWalletRisk?'⚠️':'✅'} ~${holder.freshWalletPct}%</span>
+              </span>
+            </div>
+            <div style="margin-top:8px;font-size:10px;color:var(--text3);line-height:1.6">
+              ${holder.sniperScore>=65
+                ? '🚨 Kemungkinan banyak bot/sniper masuk di awal. Hati-hati kalau mereka mulai dump ke retail.'
+                : holder.sniperScore>=35
+                ? '⚡ Ada aktivitas mencurigakan. Cek age wallet holder teratas sebelum FOMO.'
+                : '✅ Profil sniper rendah. Token ini tidak terlihat target bot masif.'}
+            </div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--text3);line-height:1.6;margin-top:4px">
+          💡 Analisis ini berbasis proxy dari data DexScreener. Untuk verifikasi on-chain:
+          <a class="ext-link" href="https://app.bubblemaps.io" target="_blank" style="display:inline;padding:2px 8px">🫧 Bubblemaps</a>
+          <a class="ext-link" href="https://gmgn.ai" target="_blank" style="display:inline;padding:2px 8px">📊 GMGN</a>
+          ${_currentChain==='solana' ? `<a class="ext-link" href="https://solscan.io/token/${_currentCA}" target="_blank" style="display:inline;padding:2px 8px">◎ Solscan</a>` : `<a class="ext-link" href="https://etherscan.io/token/${_currentCA}" target="_blank" style="display:inline;padding:2px 8px">🔗 Explorer</a>`}
+        </div>
+      </div>
+
+      <!-- ★ ALPHA CARDS: Fresh Wallet Heat · Cult Score · Farm Detection -->
+      <div class="alpha-grid">
+
+        <!-- Fresh Wallet Heat -->
+        <div class="alpha-card alpha-fresh">
+          <div class="alpha-title">🔥 FRESH WALLET HEAT</div>
+          <div class="alpha-score-row">
+            <div class="alpha-score-big ${heat.heatCls==='ok'?'ok':heat.heatCls==='warn'?'warn':'danger'}">${heat.freshPct}%</div>
+            <div class="alpha-score-right">
+              <div class="alpha-badge ${heat.heatCls==='ok'?'ab-ok':heat.heatCls==='warn'?'ab-warn':'ab-danger'}">${heat.heatEmoji} ${heat.heatLabel}</div>
+              <div class="alpha-bar"><div class="alpha-bar-fill" style="width:${heat.freshPct}%;background:${heat.heatCls==='ok'?'var(--mint)':heat.heatCls==='warn'?'var(--yellow)':'var(--coral)'}"></div></div>
+            </div>
+          </div>
+          <div class="alpha-stat"><span>Est. Unique Wallets</span><span class="alpha-stat-val">${heat.uniqueWallets}</span></div>
+          <div class="alpha-stat"><span>First-Time Buyers</span><span class="alpha-stat-val">${heat.firstTimeBuyers}</span></div>
+          <div class="alpha-stat"><span>Repeat Buyers</span><span class="alpha-stat-val">${heat.repeatBuyers}</span></div>
+          ${heat.avgWalletAgeDays ? `<div class="alpha-stat"><span>Est. Avg Wallet Age</span><span class="alpha-stat-val">${heat.avgWalletAgeDays}d</span></div>` : ''}
+          <div class="alpha-note">${heat.freshPct>=50?'⚠️ Banyak fresh wallet — bisa alpha entry atau coordinated buy.':heat.freshPct>=30?'⚡ Ada fresh wallet masuk. Monitor apakah hold atau flip.':'✅ Wallet mayoritas bukan fresh. Holder lebih stabil.'}</div>
+          <div class="alpha-source">${heat.hasTradeData?'⛓ GeckoTerminal trades':'📊 Est. behavior'}</div>
+        </div>
+
+        <!-- Cult Score -->
+        <div class="alpha-card alpha-cult">
+          <div class="alpha-title">🛐 CULT SCORE</div>
+          <div class="alpha-score-row">
+            <div class="alpha-score-big ${cult.cls==='ok'?'ok':cult.cls==='warn'?'warn':cult.cls==='neutral'?'':' danger'}">${cult.score}</div>
+            <div class="alpha-score-right">
+              <div class="alpha-badge ${cult.cls==='ok'?'ab-ok':cult.cls==='warn'?'ab-warn':cult.cls==='neutral'?'ab-neutral':'ab-danger'}">${cult.emoji} ${cult.label}</div>
+              <div class="alpha-bar"><div class="alpha-bar-fill" style="width:${cult.score}%;background:${cult.score>=75?'var(--pink)':cult.score>=55?'var(--lavender)':'var(--blue)'}"></div></div>
+            </div>
+          </div>
+          ${cult.signals.slice(0,3).map(s=>`<div class="alpha-stat"><span>${s.k}</span><span class="alpha-stat-val">${s.v}</span></div>`).join('')}
+          <div class="alpha-note">${cult.memeType}</div>
+          <div class="alpha-source">📊 Token metadata + market data</div>
+        </div>
+
+        <!-- Farm Detection -->
+        <div class="alpha-card alpha-farm">
+          <div class="alpha-title">🌾 FARM DETECTION</div>
+          <div class="alpha-score-row">
+            <div class="alpha-score-big ${farm.cls==='ok'?'ok':farm.cls==='warn'?'warn':'danger'}">${farm.score}</div>
+            <div class="alpha-score-right">
+              <div class="alpha-badge ${farm.cls==='ok'?'ab-ok':farm.cls==='warn'?'ab-warn':'ab-danger'}">${farm.emoji} ${farm.label}</div>
+              <div class="alpha-bar"><div class="alpha-bar-fill" style="width:${farm.score}%;background:${farm.score>=65?'var(--coral)':farm.score>=40?'var(--peach)':'var(--mint)'}"></div></div>
+            </div>
+          </div>
+          ${farm.signals.slice(0,3).map(s=>`<div class="alpha-stat"><span>${s.k}</span><span class="alpha-stat-val" style="color:${s.s==='danger'?'var(--down)':s.s==='warn'?'#C06020':'var(--up)'}">${s.v}</span></div>`).join('')}
+          <div class="alpha-note">${farm.verdict}</div>
+          <div class="alpha-source">${farm.hasTrades?'⛓ GeckoTerminal trades':'📊 DexScreener signals'}</div>
+        </div>
+
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-title"><span class="panel-title-icon">🎯</span> ENTRY POINT</div>
+          <div class="entry-row"><span class="entry-lbl">Metode</span><span class="entry-val" style="font-size:11px;text-align:right;max-width:170px;font-family:'M PLUS Rounded 1c',sans-serif">${ent.method}</span></div>
+          <div class="entry-row"><span class="entry-lbl">Entry Zone</span><span class="entry-val entry-entry">${fmtPrice(ent.entry)}</span></div>
+          <div class="entry-row"><span class="entry-lbl">Stop Loss</span><span class="entry-val entry-sl">${fmtPrice(ent.sl)}</span></div>
+          <div class="entry-row"><span class="entry-lbl">TP 1</span><span class="entry-val entry-tp">${fmtPrice(ent.tp1)}</span></div>
+          <div class="entry-row"><span class="entry-lbl">TP 2</span><span class="entry-val entry-tp">${fmtPrice(ent.tp2)}</span></div>
+          <div class="entry-row"><span class="entry-lbl">TP 3</span><span class="entry-val entry-tp">${fmtPrice(ent.tp3)}</span></div>
+          <div class="entry-row"><span class="entry-lbl">Risk/Reward</span><span class="entry-val ${ent.rrr>=2?'rrr-good':''}">${ent.rrr>=0?'1 : '+ent.rrr.toFixed(2):'—'}</span></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title"><span class="panel-title-icon">📐</span> FIBONACCI 24H
+            <span class="fib-source-badge">⛓ ${fib.source}</span>
+          </div>
+          <div class="fib-track">
+            <div class="fib-fill" style="width:${fib.pos}%"></div>
+            <div class="fib-pin" style="left:calc(${fib.pos}% - 2px)"></div>
+          </div>
+          <div class="fib-labels"><span>0</span><span>23.6</span><span>50</span><span>61.8</span><span>100</span></div>
+          <div style="margin-top:12px">
+            ${[['0% Low',fib.r0],['23.6%',fib.r236],['38.2%',fib.r382],['50%',fib.r500],['61.8%',fib.r618],['78.6%',fib.r786],['100% High',fib.r100]]
+              .map(([l,v])=>`<div class="entry-row"><span class="entry-lbl" style="font-size:11px">${l}</span><span class="entry-val" style="font-size:11px">${fmtPrice(v)}</span></div>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:1rem">
+        <div class="panel-title"><span class="panel-title-icon">🐋</span> WHALE / KOL / SMART MONEY
+          <span style="font-size:10px;color:var(--text3);font-family:'M PLUS Rounded 1c',sans-serif;font-weight:400"> — estimasi dari volume behavior</span>
+        </div>
+        ${whales.map(w=>`
+          <div class="whale-item">
+            <div class="w-avatar ${w.c}">${w.a}</div>
+            <div style="flex:1;min-width:0">
+              <div class="w-name">${w.nm} <span style="font-size:10px;color:var(--text3);font-weight:400">${w.t}</span></div>
+              <div class="w-meta">Avg In: ${w.avgIn} · Hold: ${w.hold}% posisi</div>
+              <div class="w-meta" style="margin-top:2px">${w.st}</div>
+            </div>
+            <div class="w-pnl">
+              <div class="w-pct ${parseFloat(w.pnl)>=0?'up':'down'}">${parseFloat(w.pnl)>=0?'+':''}${w.pnl}%</div>
+              <div class="w-status">unrealized PnL</div>
+            </div>
+          </div>`).join('')}
+        <div style="margin-top:10px;font-size:11px;color:var(--text3);line-height:1.7">🔍 Untuk data on-chain real-time, cek langsung:</div>
+        <div class="ext-links">
+          <a class="ext-link" href="https://cielo.finance" target="_blank">🌐 Cielo Finance</a>
+          <a class="ext-link" href="https://app.bubblemaps.io" target="_blank">🫧 Bubblemaps</a>
+          <a class="ext-link" href="https://gmgn.ai" target="_blank">📊 GMGN</a>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-title"><span class="panel-title-icon">📊</span> VOLUME BREAKDOWN</div>
+          ${[['1H',vol1,vol1/(volMax/24)],['6H',vol6,vol6/(volMax/4)],['24H',vol24,1]]
+            .map(([tf,v,r])=>`<div class="vol-row">
+              <span class="vol-tf">${tf}</span>
+              <div class="vol-bg"><div class="vol-fill" style="width:${Math.min(100,r*100).toFixed(0)}%;background:${tf==='24H'?'var(--lavender)':tf==='6H'?'var(--blue)':'var(--mint)'}"></div></div>
+              <span class="vol-val">${fmt(v)}</span>
+            </div>`).join('')}
+          <div style="height:14px"></div>
+          <div class="panel-title"><span class="panel-title-icon">🔬</span> TECHNICAL SIGNALS</div>
+          <table class="sig-table">
+            ${sig.reasons.map(r=>`<tr>
+              <td class="sig-name">${r.k}</td>
+              <td class="sig-val">${r.v}</td>
+              <td style="text-align:right">${sigPill(r.s)}</td>
+            </tr>`).join('')}
+          </table>
+        </div>
+        <div class="panel">
+          <div class="panel-title"><span class="panel-title-icon">⭐</span> CONVICTION SCORE</div>
+          <div class="score-center">
+            <div class="score-circle" style="background:${scoreS.bg};border:${scoreS.ring}">
+              <span class="score-num" style="color:${scoreS.color}">${sig.score}</span>
+              <span class="score-denom">/100</span>
+            </div>
+            <div class="score-lbl" style="color:${scoreS.color}">✦ ${sig.label}</div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-lbl"><span>Risk Level</span><span>${riskLvl}%</span></div>
+            <div class="risk-bg"><div class="risk-fill" style="width:${riskLvl}%;background:${riskLvl>60?'var(--coral)':riskLvl>35?'var(--peach)':'var(--mint)'}"></div></div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-lbl"><span>Vol/MC Health</span><span>${vmrPct}%</span></div>
+            <div class="risk-bg"><div class="risk-fill" style="width:${vmrPct}%;background:var(--blue)"></div></div>
+          </div>
+          <div class="risk-row">
+            <div class="risk-lbl"><span>Liquidity Depth</span><span>${liqPct}%</span></div>
+            <div class="risk-bg"><div class="risk-fill" style="width:${liqPct}%;background:var(--lavender)"></div></div>
+          </div>
+          <div class="tf-recommend">
+            <div class="tf-lbl">⏱ TIMEFRAME REKOMENDASI</div>
+            ${tfText}
+          </div>
+        </div>
+      </div>
+
+      <button class="more-btn" onclick="openRpgAnalysis()">
+        ⚔ Minta Analisis Lebih Detail — Deep Oracle Mode ↗
+      </button>`;
+
+    // Init bubble canvas after DOM update
+    setTimeout(() => setupBubbleCanvas(bubbles), 50);
+
+  } catch(e) {
+    document.getElementById('content').innerHTML = `<div class="err-box">⚡ Gagal ambil data: ${e.message}. Coba lagi ya~</div>`;
+  }
+  btn.disabled = false;
+}
+
+// ─── RPG DIALOG ───────────────────────────────────────
+function closeRpg() {
+  document.getElementById('rpgOverlay').classList.remove('open');
+}
+
+function openRpgAnalysis() {
+  if (!_currentData) return;
+  const overlay = document.getElementById('rpgOverlay');
+  const body    = document.getElementById('rpgBody');
+  const actions = document.getElementById('rpgActions');
+
+  overlay.classList.add('open');
+  body.innerHTML = `<div class="rpg-loading"><div class="rpg-dots"><span></span><span></span><span></span></div>Oracle sedang membaca kristal data...</div>`;
+  actions.style.display = 'none';
+
+  // Set bubblemap button
+  document.getElementById('rpgBubbleMapBtn').onclick = () => {
+    window.open(`https://app.bubblemaps.io/${_currentChain}/token/${_currentCA}`, '_blank');
+  };
+
+  setTimeout(() => {
+    renderRpgDialog(body);
+    actions.style.display = 'flex';
+  }, 800);
+}
+
+function renderRpgDialog(body) {
+  const data  = _currentData;
+  const sym   = _currentSym;
+  const price = parseFloat(data.priceUsd||0);
+  const ch24  = parseFloat(data.priceChange?.h24||0);
+  const ch6   = parseFloat(data.priceChange?.h6||0);
+  const ch1   = parseFloat(data.priceChange?.h1||0);
+  const vol24 = parseFloat(data.volume?.h24||0);
+  const vol6  = parseFloat(data.volume?.h6||0);
+  const vol1  = parseFloat(data.volume?.h1||0);
+  const liq   = parseFloat(data.liquidity?.usd||0);
+  const mc    = parseFloat(data.marketCap||data.fdv||0);
+  const buy   = parseInt(data.txns?.h24?.buys||0);
+  const sell  = parseInt(data.txns?.h24?.sells||0);
+  const sig   = computeSignal(data);
+  // Reuse stored fib/cult/farm/heat from last analyze (they share _currentData)
+  const fib   = _lastFib   || calcFib(price, ch24, null);
+  const ent   = computeEntry(price, fib, ch1);
+  const whales = genWhales(data, price);
+  const holder = computeHolderAnalysis(data, price);
+  const cult   = _lastCult  || computeCultScore(data, _currentChain);
+  const farm   = _lastFarm  || computeFarmScore(data, null);
+  const heat   = _lastHeat  || computeFreshWalletHeat(data, null, holder);
+
+  const totalTxn = buy + sell;
+  const buyPct   = totalTxn > 0 ? ((buy/totalTxn)*100).toFixed(0) : 50;
+  const vmr      = mc > 0 ? (vol24/mc*100).toFixed(1) : 0;
+  const volAccel = vol6 > 0 && vol24 > 0 ? (vol6/(vol24/4)).toFixed(2) : 1;
+
+  // Narrative detection
+  const isHype     = ch24 > 30 && vol24 > 500000;
+  const isDead     = ch24 < -20 && vol24 < 50000;
+  const isAccum    = Math.abs(ch24) < 10 && parseFloat(vmr) > 30;
+  const isDump     = ch24 < -15 && parseFloat(volAccel) < 0.5;
+  const isBreakout = ch24 > 20 && parseFloat(volAccel) > 1.5;
+
+  let narrative = '';
+  let narrativeChar = 'sage';
+  let narrativeEmoji = '🔮';
+  if (isHype) {
+    narrative = `<span class="warn">HYPE MODE DETECTED!</span> Volume meledak ${fmt(vol24)} dalam 24jam, harga naik ${fmtP(ch24)}. Ini tanda banyak FOMO masuk. <span class="danger">Hati-hati dump setelah hype!</span> Kalau kamu belum masuk, jangan chase. Tunggu pullback dulu ke support terdekat.`;
+    narrativeChar = 'devil'; narrativeEmoji = '🔥';
+  } else if (isDead) {
+    narrative = `<span class="danger">SINYAL LEMAH.</span> Volume ${fmt(vol24)} dan harga turun ${fmtP(ch24)}. Token ini lagi lesu bro. Mungkin developer sudah tidak aktif, atau market sedang tidak tertarik. <span class="warn">Skip dulu, cari yang lebih hidup.</span>`;
+    narrativeChar = 'devil'; narrativeEmoji = '💀';
+  } else if (isAccum) {
+    narrative = `<span class="ok">FASE AKUMULASI!</span> Harga sideways tapi volume sehat (${vmr}% Vol/MC). Ini biasanya tanda wallet besar lagi kumpulin barang pelan-pelan. <span class="hi">Setup bagus untuk entry bertahap!</span>`;
+    narrativeChar = 'sage'; narrativeEmoji = '📦';
+  } else if (isDump) {
+    narrative = `<span class="danger">WASPADA DISTRIBUSI.</span> Harga turun ${fmtP(ch24)}, volume 6H melambat (accel: ${volAccel}x). Kemungkinan holder besar lagi jual secara perlahan. <span class="warn">Jangan averaging down dulu.</span>`;
+    narrativeChar = 'devil'; narrativeEmoji = '📉';
+  } else if (isBreakout) {
+    narrative = `<span class="hi">BREAKOUT PATTERN!</span> Volume akselerasi ${volAccel}x plus harga naik ${fmtP(ch24)}. Classic breakout. <span class="ok">Entry di pullback terdekat ${fmtPrice(ent.entry)} dengan SL ${fmtPrice(ent.sl)}</span> bisa jadi setup yang oke!`;
+    narrativeChar = 'kol'; narrativeEmoji = '🚀';
+  } else {
+    narrative = `Market ${sym} lagi <span class="val">konsolidasi normal</span>. Tidak ada sinyal ekstremal yang ketangkep. Volume ${fmt(vol24)}, Vol/MC ${vmr}%. <span class="ok">Monitor dulu, tunggu konfirmasi arah.</span>`;
+    narrativeChar = 'sage'; narrativeEmoji = '⚖️';
+  }
+
+  // KOL from whales
+  const kols    = whales.filter(w=>w.t==='KOL');
+  const kolText = kols.length > 0
+    ? kols.map(k=>`<span class="val">${k.nm}</span> (avg in ${k.avgIn}, PnL ${k.pnl}%)`).join(', ')
+    : 'Belum terdeteksi KOL aktif di sini.';
+
+  // Top Holders summary
+  const topHolders = whales.filter(w=>w.t==='Whale'||w.t==='Smart Money');
+
+  // Dev history inference
+  const pairAge = data.pairCreatedAt ? Math.floor((Date.now() - data.pairCreatedAt) / (1000*60*60*24)) : null;
+  const devNote = pairAge !== null
+    ? pairAge < 7  ? `<span class="warn">Token masih sangat baru (${pairAge} hari)! Riwayat developer belum bisa diverifikasi.</span>`
+    : pairAge < 30 ? `<span class="ok">Token berumur ${pairAge} hari — developer masih relatif baru. Perhatikan konsistensi update.</span>`
+    : `<span class="ok">Token sudah ${pairAge} hari. Developer cukup konsisten bertahan, ini sinyal positif.</span>`
+    : `Umur pair tidak diketahui. Cek langsung di explorer untuk riwayat deployer.`;
+
+  // Build RPG messages
+  const delay = i => `animation-delay:${i*0.15}s`;
+
+  body.innerHTML = `<div class="rpg-scene" style="position:relative">
+
+  <!-- Floating ambient sparkles -->
+  <div class="rpg-sparkle" style="left:5%;top:30px;animation-delay:0s">✿</div>
+  <div class="rpg-sparkle" style="left:88%;top:60px;animation-delay:1.2s">✦</div>
+  <div class="rpg-sparkle" style="left:45%;top:15px;animation-delay:2.4s">❀</div>
+  <div class="rpg-sparkle" style="left:72%;top:90px;animation-delay:0.8s;font-size:10px">⋆</div>
+  <div class="rpg-sparkle" style="left:22%;top:80px;animation-delay:3s;font-size:10px">✩</div>
+
+    <!-- Opening -->
+    <div class="rpg-msg" style="${delay(0)}">
+      <div class="rpg-avatar afeng">🍵</div>
+      <div class="rpg-bubble-wrap">
+        <div class="rpg-name afeng-name">AFENG THE ORACLE</div>
+        <div class="rpg-bubble">
+          Kamu datang di waktu yang tepat, petualang! Aku sudah baca kristal pasar untuk token <span class="hi">${sym}</span>. Siap dengar ramalanku? ✨
+        </div>
+      </div>
+    </div>
+
+    <div class="rpg-divider"><div class="rpg-divider-line"></div><div class="rpg-divider-txt">─ VOLUME ANALYSIS ─</div><div class="rpg-divider-line"></div></div>
+
+    <!-- Volume Analysis -->
+    <div class="rpg-msg" style="${delay(1)}">
+      <div class="rpg-avatar analyst">📊</div>
+      <div class="rpg-bubble-wrap">
+        <div class="rpg-name analyst-name">DATA ANALYST MITSUKI</div>
+        <div class="rpg-bubble">
+          Laporan volume masuk! Ini yang aku temukan dari kristal data:
+          <div class="rpg-stat"><span class="lbl">Volume 24H</span><span class="vl ${vol24>500000?'ok':'warn'}">${fmt(vol24)}</span></div>
+          <div class="rpg-stat"><span class="lbl">Volume 6H</span><span class="vl">${fmt(vol6)}</span></div>
+          <div class="rpg-stat"><span class="lbl">Volume 1H</span><span class="vl">${fmt(vol1)}</span></div>
+          <div class="rpg-stat"><span class="lbl">Vol Akselerasi 6H</span><span class="vl ${parseFloat(volAccel)>1.2?'ok':parseFloat(volAccel)<0.7?'danger':'warn'}">${volAccel}x</span></div>
+          <div class="rpg-stat"><span class="lbl">Vol/MC Ratio</span><span class="vl ${parseFloat(vmr)>30?'ok':'warn'}">${vmr}%</span></div>
+          <div class="rpg-stat"><span class="lbl">Buy Txns</span><span class="vl ok">${buy.toLocaleString()} (${buyPct}%)</span></div>
+          <div class="rpg-stat"><span class="lbl">Sell Txns</span><span class="vl danger">${sell.toLocaleString()} (${(100-parseInt(buyPct))}%)</span></div>
+          ${vol24 > 1000000 ? `<br>⚡ <span class="hi">Volume SANGAT TINGGI!</span> Ini tanda market sedang ramai banget.`
+           : vol24 > 100000 ? `<br><span class="ok">Volume sehat dan stabil.</span>`
+           : `<br><span class="warn">Volume masih tipis. Hati-hati likuiditas.</span>`}
+        </div>
+      </div>
+    </div>
+
+    <div class="rpg-divider"><div class="rpg-divider-line"></div><div class="rpg-divider-txt">─ SMART MONEY ─</div><div class="rpg-divider-line"></div></div>
+
+    <!-- Smart Money -->
+    <div class="rpg-msg right" style="${delay(2)}">
+      <div class="rpg-avatar whale">🐋</div>
+      <div class="rpg-bubble-wrap">
+        <div class="rpg-name whale-name" style="text-align:right">WHALE TRACKER YUKI</div>
+        <div class="rpg-bubble">
+          *membuka buku catatan* Aku pantau pergerakan wallet besar di ${sym}:
+          ${whales.filter(w=>w.t==='Smart Money').map(w=>`
+          <div class="rpg-stat">
+            <span class="lbl">${w.nm}</span>
+            <span class="vl ${parseFloat(w.pnl)>=0?'ok':'danger'}">${parseFloat(w.pnl)>=0?'+':''}${w.pnl}% PnL</span>
+          </div>`).join('')}
+          ${whales.filter(w=>w.t==='Smart Money').some(w=>parseFloat(w.pnl)>50)
+            ? `<br>🚨 <span class="warn">Smart money sudah profit besar! Bisa jadi mereka mau exit sebentar lagi.</span>`
+            : `<br><span class="ok">Smart money masih holding — bullish signal!</span>`}
+        </div>
+      </div>
+    </div>
+
+    <div class="rpg-divider"><div class="rpg-divider-line"></div><div class="rpg-divider-txt">─ KOL ACTIVITY ─</div><div class="rpg-divider-line"></div></div>
+
+    <!-- KOL -->
+    <div class="rpg-msg" style="${delay(3)}">
+      <div class="rpg-avatar kol">🎙️</div>
+      <div class="rpg-bubble-wrap">
+        <div class="rpg-name kol-name">KOL SCOUT HANA</div>
+        <div class="rpg-bubble">
+          Dari pantauan aktivitas influencer dan KOL:<br><br>
+          ${kolText}
+          <br><br>
+          ${kols.length > 0 && kols.some(k=>parseFloat(k.pnl)>60)
+            ? `<span class="warn">⚠️ KOL sudah deep in profit. Awas kalau mereka mulai post "take profit" — bisa jadi signal exit.</span>`
+            : kols.length > 0
+            ? `<span class="ok">KOL masih dalam posisi — kemungkinan belum mau exit dalam waktu dekat.</span>`
+            : `Cek Twitter/Telegram untuk konfirmasi KOL yang shill token ini. Jangan FOMO kalau belum ada konfirmasi.`}
+        </div>
+      </div>
+    </div>
+
+    <div class="rpg-divider"><div class="rpg-divider-line"></div><div class="rpg-divider-txt">─ TOP HOLDERS ─</div><div class="rpg-divider-line"></div></div>
+
+    <!-- Top Holders -->
+    <div class="rpg-msg right" style="${delay(4)}">
+      <div class="rpg-avatar whale">💰</div>
+      <div class="rpg-bubble-wrap">
+        <div class="rpg-name whale-name" style="text-align:right">HOLDER ANALYST RYU</div>
+        <div class="rpg-bubble">
+          Distribusi holder yang terdeteksi di cluster map:
+          ${topHolders.map(h=>`
+          <div class="rpg-stat">
+            <span class="lbl">${h.nm}</span>
+            <span class="vl">${h.hold}% posisi · ${h.st.split('—')[0].trim()}</span>
+          </div>`).join('')}
+          <div class="rpg-stat"><span class="lbl">Concentration Risk</span><span class="vl ${holder.concCls}">${holder.concEmoji} ${holder.concLabel} (${holder.concScore}/100)</span></div>
+          <div class="rpg-stat"><span class="lbl">Est. Dev Holding</span><span class="vl ${parseFloat(holder.devHoldPct)>10?'danger':'ok'}">${holder.devHoldPct}%</span></div>
+          <div class="rpg-stat"><span class="lbl">Est. Top 5 Wallets</span><span class="vl ${parseFloat(holder.top5HoldPct)>60?'danger':parseFloat(holder.top5HoldPct)>40?'warn':'ok'}">${holder.top5HoldPct}% supply</span></div>
+          <div class="rpg-stat"><span class="lbl">Sniper Probability</span><span class="vl ${holder.sniperCls}">${holder.sniperEmoji} ${holder.sniperLabel} (${holder.sniperScore}/100)</span></div>
+          <div class="rpg-stat"><span class="lbl">Fresh Wallet Est.</span><span class="vl ${holder.freshWalletRisk?'warn':'ok'}">${holder.freshWalletRisk?'⚠️':'✅'} ~${holder.freshWalletPct}%</span></div>
+          <br>
+          ${holder.concScore>=70
+            ? `<span class="danger">🚨 Konsentrasi SANGAT TINGGI! Dev atau whale bisa dump kapan aja. DYOR ketat.</span>`
+            : holder.concScore>=50
+            ? `<span class="warn">⚡ Konsentrasi sedang. Monitor wallet besar, jangan all-in.</span>`
+            : `<span class="ok">✅ Distribusi relatif sehat — risiko concentrated dump lebih rendah.</span>`}
+          <br>
+          ${holder.sniperScore>=65
+            ? `<br><span class="danger">🤖 Banyak sniper/bot kemungkinan masuk di awal. Mereka biasanya dump ke retail — hati-hati FOMO!</span>`
+            : holder.sniperScore>=35
+            ? `<br><span class="warn">⚡ Ada indikasi sniper. Cek holder teratas di Bubblemaps atau GMGN sebelum masuk.</span>`
+            : `<br><span class="ok">✅ Profil sniper rendah — pattern entry terlihat lebih organik.</span>`}
+          ${liq > 200000
+            ? `<br><span class="ok">Likuiditas ${fmt(liq)} cukup dalam — aman dari rug pull dadakan.</span>`
+            : `<br><span class="danger">⚠️ Likuiditas ${fmt(liq)} tipis! Risiko rug atau slippage tinggi.</span>`}
+        </div>
+      </div>
+    </div>
+
+    <div class="rpg-divider"><div class="rpg-divider-line"></div><div class="rpg-divider-txt">─ DEVELOPER HISTORY ─</div><div class="rpg-divider-line"></div></div>
+
+    <!-- Dev History -->
+    <div class="rpg-msg" style="${delay(5)}">
+      <div class="rpg-avatar sage">🧙</div>
+      <div class="rpg-bubble-wrap">
+        <div class="rpg-name sage-name">SAGE RESEARCHER MIKA</div>
+        <div class="rpg-bubble">
+          Dari arsip yang aku baca tentang developer token ini:<br><br>
+          ${devNote}<br><br>
+          Pair terdaftar di <span class="val">${(data.dexId||'DEX').toUpperCase()}</span>. 
+          Token name: <span class="val">${data.baseToken?.name||sym}</span>.<br>
+          Untuk verifikasi deployer wallet dan riwayat contract, aku sarankan cek langsung di 
+          <span class="ok">Etherscan / Solscan / BscScan</span> ya~
+        </div>
+      </div>
+    </div>
+
+    <div class="rpg-divider"><div class="rpg-divider-line"></div><div class="rpg-divider-txt">─ MARKET NARRATIVE ─</div><div class="rpg-divider-line"></div></div>
+
+    <!-- Narrative -->
+    <div class="rpg-msg" style="${delay(6)}">
+      <div class="rpg-avatar ${narrativeChar}">${narrativeEmoji}</div>
+      <div class="rpg-bubble-wrap">
+        <div class="rpg-name ${narrativeChar}-name">ORACLE NARASI</div>
+        <div class="rpg-bubble">
+          ${narrative}
+        </div>
+      </div>
+    </div>
+
+    <div class="rpg-divider"><div class="rpg-divider-line"></div><div class="rpg-divider-txt">─ TECHNICAL VERDICT ─</div><div class="rpg-divider-line"></div></div>
+
+    <!-- Technical -->
+    <div class="rpg-msg right" style="${delay(7)}">
+      <div class="rpg-avatar analyst">⚔️</div>
+      <div class="rpg-bubble-wrap">
+        <div class="rpg-name analyst-name" style="text-align:right">TACTICIAN KENJI</div>
+        <div class="rpg-bubble">
+          Verdict teknikal dari semua data yang ada:
+          <div class="rpg-stat"><span class="lbl">Overall Signal</span><span class="vl ${sig.score>=60?'ok':sig.score>=40?'warn':'danger'}">${sig.label} (${sig.score}/100)</span></div>
+          <div class="rpg-stat"><span class="lbl">Entry Ideal</span><span class="vl ok">${fmtPrice(ent.entry)}</span></div>
+          <div class="rpg-stat"><span class="lbl">Stop Loss</span><span class="vl danger">${fmtPrice(ent.sl)}</span></div>
+          <div class="rpg-stat"><span class="lbl">Target TP1</span><span class="vl ok">${fmtPrice(ent.tp1)}</span></div>
+          <div class="rpg-stat"><span class="lbl">Risk/Reward</span><span class="vl ${ent.rrr>=2?'ok':'warn'}">1 : ${ent.rrr.toFixed(2)}</span></div>
+          <div class="rpg-stat"><span class="lbl">Fib Position</span><span class="vl">${fib.pos.toFixed(0)}% dari range (${fib.source})</span></div>
+          <br>
+          ${sig.score >= 65
+            ? `<span class="ok">✅ Setup cukup solid. Kalau entry di zona yang benar dengan SL ketat, risk/reward masih favorable.</span>`
+            : sig.score >= 40
+            ? `<span class="warn">⚠️ Sinyal mixed. Jangan all-in. Kalau mau masuk, size kecil dulu dan tunggu konfirmasi.</span>`
+            : `<span class="danger">🚫 Sinyal bearish mendominasi. Skip dulu atau tunggu reversal yang jelas sebelum masuk.</span>`}
+        </div>
+      </div>
+    </div>
+
+    <div class="rpg-divider"><div class="rpg-divider-line"></div><div class="rpg-divider-txt">─ FRESH WALLET HEAT ─</div><div class="rpg-divider-line"></div></div>
+
+    <!-- Fresh Wallet Heat -->
+    <div class="rpg-msg" style="${delay(8)}">
+      <div class="rpg-avatar kol">🔥</div>
+      <div class="rpg-bubble-wrap">
+        <div class="rpg-name kol-name">SCOUT NANA</div>
+        <div class="rpg-bubble">
+          Dari analisis wallet yang aku lacak buat token ini:
+          <div class="rpg-stat"><span class="lbl">Fresh Wallet Est.</span><span class="vl ${heat.heatCls==='ok'?'ok':heat.heatCls==='warn'?'warn':'danger'}">${heat.heatEmoji} ${heat.freshPct}% — ${heat.heatLabel}</span></div>
+          <div class="rpg-stat"><span class="lbl">Est. Unique Wallets</span><span class="vl">${heat.uniqueWallets}</span></div>
+          <div class="rpg-stat"><span class="lbl">First-Time Buyers</span><span class="vl ok">${heat.firstTimeBuyers}</span></div>
+          <div class="rpg-stat"><span class="lbl">Repeat Buyers</span><span class="vl warn">${heat.repeatBuyers}</span></div>
+          ${heat.avgWalletAgeDays ? `<div class="rpg-stat"><span class="lbl">Est. Avg Wallet Age</span><span class="vl">${heat.avgWalletAgeDays} hari</span></div>` : ''}
+          <div class="rpg-stat"><span class="lbl">Data Source</span><span class="vl" style="font-size:10px">${heat.hasTradeData?'⛓ GeckoTerminal':'📊 Behavior est.'}</span></div>
+          <br>
+          ${heat.freshPct>=50
+            ? `<span class="warn">⚠️ Banyak fresh wallet masuk — ini bisa jadi sinyal ALPHA (early entry) atau coordinated shill. Monitor apakah hold atau langsung flip.</span>`
+            : heat.freshPct>=30
+            ? `<span class="warn">⚡ Ada fresh wallet yang masuk. Aku rekomendasikan pantau pergerakan 24-48 jam ke depan untuk konfirmasi intent.</span>`
+            : `<span class="ok">✅ Mayoritas wallet bukan fresh. Holder terlihat lebih established dan kemungkinan conviction lebih tinggi.</span>`}
+        </div>
+      </div>
+    </div>
+
+    <div class="rpg-divider"><div class="rpg-divider-line"></div><div class="rpg-divider-txt">─ CULT SCORE ─</div><div class="rpg-divider-line"></div></div>
+
+    <!-- Cult Score -->
+    <div class="rpg-msg right" style="${delay(9)}">
+      <div class="rpg-avatar devil">🔮</div>
+      <div class="rpg-bubble-wrap">
+        <div class="rpg-name devil-name" style="text-align:right">ORACLE NARRATIVE</div>
+        <div class="rpg-bubble">
+          Aku baca aura narrative token ini dari kristal...
+          <div class="rpg-stat"><span class="lbl">Cult Score</span><span class="vl ${cult.score>=75?'danger':cult.score>=55?'warn':cult.score>=35?'':' ok'}">${cult.emoji} ${cult.score}/100 — ${cult.label}</span></div>
+          ${cult.signals.map(s=>`<div class="rpg-stat"><span class="lbl">${s.k}</span><span class="vl">${s.v}</span></div>`).join('')}
+          <br>
+          ${cult.score>=75
+            ? `<span class="danger">🔥 CULT TOKEN DETECTED! Narrative sangat kuat — meme propagation potential tinggi. Ini bisa pump cepat tapi juga dump cepat. Ride the wave with a plan.</span>`
+            : cult.score>=55
+            ? `<span class="warn">⚡ Narrative energy kuat. Token ini punya bahan bakar hype yang cukup. Kalau ada catalyst (tweet viral, listing), bisa explosive.</span>`
+            : cult.score>=35
+            ? `<span>💬 Narrative moderate. Ada traction tapi belum viral. Perlu catalyst external untuk breakout.</span>`
+            : `<span class="ok">😴 Narrative lemah atau utility-focused. Tidak banyak meme energy. Lebih ke hold daripada trade hype.</span>`}
+        </div>
+      </div>
+    </div>
+
+    <div class="rpg-divider"><div class="rpg-divider-line"></div><div class="rpg-divider-txt">─ FARM DETECTION ─</div><div class="rpg-divider-line"></div></div>
+
+    <!-- Farm Detection -->
+    <div class="rpg-msg" style="${delay(10)}">
+      <div class="rpg-avatar analyst">🌾</div>
+      <div class="rpg-bubble-wrap">
+        <div class="rpg-name analyst-name">INVESTIGATOR REN</div>
+        <div class="rpg-bubble">
+          Aku periksa pola transaksi token ini dengan teliti:
+          <div class="rpg-stat"><span class="lbl">Farm Risk Score</span><span class="vl ${farm.score>=65?'danger':farm.score>=40?'warn':'ok'}">${farm.emoji} ${farm.score}/100 — ${farm.label}</span></div>
+          ${farm.signals.map(s=>`<div class="rpg-stat"><span class="lbl">${s.k}</span><span class="vl ${s.s==='danger'?'danger':s.s==='warn'?'warn':'ok'}">${s.v}${s.note?' · '+s.note:''}</span></div>`).join('')}
+          <div class="rpg-stat"><span class="lbl">Data Source</span><span class="vl" style="font-size:10px">${farm.hasTrades?'⛓ GeckoTerminal trades + DexScreener':'📊 DexScreener signals only'}</span></div>
+          <br>
+          ${farm.score>=65
+            ? `<span class="danger">🚨 ${farm.verdict} Volume yang terlihat mungkin tidak merepresentasikan demand organik yang sesungguhnya.</span>`
+            : farm.score>=40
+            ? `<span class="warn">⚠️ ${farm.verdict} Tidak harus skip, tapi masuk dengan size kecil dulu.</span>`
+            : `<span class="ok">✅ ${farm.verdict} Volume terlihat lebih organik dan sehat.</span>`}
+        </div>
+      </div>
+    </div>
+
+    <!-- Closing -->
+    <div class="rpg-msg" style="${delay(11)}">
+      <div class="rpg-avatar afeng">🍵</div>
+      <div class="rpg-bubble-wrap">
+        <div class="rpg-name afeng-name">AFENG THE ORACLE</div>
+        <div class="rpg-bubble">
+          Itulah seluruh ramalan dari kristal Afeng~ 🔮<br><br>
+          Ingat, petualang: <span class="hi">ini hanya estimasi dari data publik</span>, bukan jaminan profit. Market itu penuh kejutan. <span class="ok">Selalu pasang SL, jangan FOMO, dan DYOR!</span><br><br>
+          <span style="color:#7A6E9A;font-size:10px">— NFA · 自己責任で · がんばって ✿</span>
+        </div>
+      </div>
+    </div>
+
+  </div>`;
+}
+
+// ─── Input listener ────────────────────────────────────
+document.getElementById('caInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') analyze();
+});
+
+// Close overlay on backdrop click
+document.getElementById('rpgOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('rpgOverlay')) closeRpg();
+});
+</script>
+</body>
+</html>
